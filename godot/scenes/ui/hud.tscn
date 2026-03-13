@@ -1,0 +1,44 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud_script"]
+
+[node name="Hud" type="CanvasLayer"]
+script = ExtResource("1_hud_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 560.0
+offset_bottom = 210.0
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HealthLabel" type="Label" parent="Margin/VBox"]
+layout_mode = 2
+text = "Knight Integrity: 100 / 100"
+
+[node name="HealthBar" type="ProgressBar" parent="Margin/VBox"]
+custom_minimum_size = Vector2(260, 18)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="EnemyCounterLabel" type="Label" parent="Margin/VBox"]
+layout_mode = 2
+text = "Sentries Remaining: 0 / 0"
+
+[node name="BossStatusLabel" type="Label" parent="Margin/VBox"]
+visible = false
+layout_mode = 2
+text = "Boss Status"
+
+[node name="MessageLabel" type="Label" parent="Margin/VBox"]
+layout_mode = 2
+text = ""

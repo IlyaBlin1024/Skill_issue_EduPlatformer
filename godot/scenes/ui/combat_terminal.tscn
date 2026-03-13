@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://bgp0gm3hraadj"]
+
+[ext_resource type="Script" uid="uid://dh3eih61rb21v" path="res://scripts/combat_terminal.gd" id="1_terminal_script"]
+
+[node name="CombatTerminal" type="CanvasLayer" unique_id=1498571445]
+script = ExtResource("1_terminal_script")
+
+[node name="Panel" type="PanelContainer" parent="." unique_id=145788979]
+visible = false
+offset_left = 180.0
+offset_top = 80.0
+offset_right = 1100.0
+offset_bottom = 640.0
+
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=2066338209]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1824055717]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=112154126]
+layout_mode = 2
+text = "Combat Terminal"
+
+[node name="Status" type="Label" parent="Panel/Margin/VBox" unique_id=1442414547]
+layout_mode = 2
+text = "Encounter ready."
+
+[node name="TimerLabel" type="Label" parent="Panel/Margin/VBox" unique_id=236121002]
+layout_mode = 2
+text = "Time: 180"
+
+[node name="CodeEditor" type="TextEdit" parent="Panel/Margin/VBox" unique_id=1687483697]
+custom_minimum_size = Vector2(0, 320)
+layout_mode = 2
+placeholder_text = "Write Python-like code here..."
+
+[node name="Actions" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1549933143]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RunButton" type="Button" parent="Panel/Margin/VBox/Actions" unique_id=774544425]
+layout_mode = 2
+text = "Run"
+
+[node name="CloseButton" type="Button" parent="Panel/Margin/VBox/Actions" unique_id=192412833]
+layout_mode = 2
+text = "Close"
