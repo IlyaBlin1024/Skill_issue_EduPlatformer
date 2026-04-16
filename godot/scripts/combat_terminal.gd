@@ -8,12 +8,15 @@ signal terminal_closed
 @onready var status_label: Label = $Panel/Margin/VBox/Status
 @onready var timer_label: Label = $Panel/Margin/VBox/TimerLabel
 @onready var code_editor: TextEdit = $Panel/Margin/VBox/CodeEditor
+@onready var hint_label: Label = $Panel/Margin/VBox/HintLabel
 @onready var run_button: Button = $Panel/Margin/VBox/Actions/RunButton
+@onready var hint_button: Button = $Panel/Margin/VBox/Actions/HintButton
 @onready var close_button: Button = $Panel/Margin/VBox/Actions/CloseButton
 
 var _active_payload: Dictionary = {}
 var _time_left := 0.0
 var _request_in_flight := false
+var _hint_request_in_flight := false
 var _timer_enabled := true
 var _interaction_type := "combat"
 
@@ -22,8 +25,10 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	hide_terminal()
 	run_button.pressed.connect(_on_run_pressed)
+	hint_button.pressed.connect(_on_hint_pressed)
 	close_button.pressed.connect(_on_close_pressed)
-	CodeApiClient.combat_result_received.connect(_on_combat_result_received)
+	CodeApiClient.validation_result_received.connect(_on_combat_result_received)
+	CodeApiClient.hint_result_received.connect(_on_hint_result_received)
 	CodeApiClient.request_failed.connect(_on_request_failed)
 
 
@@ -33,12 +38,17 @@ func open_terminal(payload: Dictionary) -> void:
 	_timer_enabled = bool(payload.get("timer_enabled", true))
 	_time_left = float(payload.get("time_limit", 180))
 	_request_in_flight = false
+	_hint_request_in_flight = false
 	code_editor.editable = true
 	run_button.disabled = false
+	hint_button.disabled = false
 	close_button.disabled = false
 	title_label.text = String(payload.get("title", "Combat Terminal"))
-	code_editor.text = _default_snippet_for_interaction()
+	code_editor.text = String(payload.get("starter_code", _default_snippet_for_interaction()))
 	status_label.text = String(payload.get("status_text", "Encounter ready."))
+	hint_label.text = ""
+	hint_label.visible = false
+	hint_button.visible = true
 	timer_label.visible = _timer_enabled
 	if _timer_enabled:
 		timer_label.text = "Time: %d" % int(_time_left)
@@ -58,7 +68,18 @@ func _process(delta: float) -> void:
 	timer_label.text = "Time: %d" % int(ceil(_time_left))
 	if _time_left <= 0.0:
 		status_label.text = "Time is up. The enemy strikes first."
-		interaction_resolved.emit(false, {"interaction_type": _interaction_type, "attack_mode": String(_active_payload.get("attack_mode", "melee")), "success": false, "errors": ["time limit reached"], "damage_to_player": 25})
+		interaction_resolved.emit(
+			false,
+			{
+				"interaction_type": _interaction_type,
+				"attack_mode": String(_active_payload.get("attack_mode", "melee")),
+				"success": false,
+				"errors": ["time limit reached"],
+				"hints": ["The timer expired. Try a smaller valid snippet first."],
+				"damage_to_player": 25,
+				"suggested_difficulty": _fallback_suggested_difficulty(String(_active_payload.get("difficulty", "easy")))
+			}
+		)
 		hide_terminal()
 
 
@@ -72,12 +93,30 @@ func _on_run_pressed() -> void:
 
 	var payload := {
 		"user_id": "anon_local",
+		"interaction_type": _interaction_type,
 		"level_theme": _active_payload.get("level_theme", "variables"),
 		"difficulty": _active_payload.get("difficulty", "easy"),
 		"code": code_editor.text,
 		"time_taken_seconds": int(_active_payload.get("time_limit", 180) - _time_left),
 	}
-	CodeApiClient.validate_combat(payload)
+	CodeApiClient.validate_interaction(payload)
+
+
+func _on_hint_pressed() -> void:
+	if _hint_request_in_flight or _request_in_flight:
+		return
+	_hint_request_in_flight = true
+	hint_button.disabled = true
+	hint_label.visible = true
+	hint_label.text = "Requesting hint..."
+	var payload := {
+		"user_id": "anon_local",
+		"interaction_type": _interaction_type,
+		"level_theme": _active_payload.get("level_theme", "variables"),
+		"difficulty": _active_payload.get("difficulty", "easy"),
+		"code": code_editor.text,
+	}
+	CodeApiClient.request_hints(payload)
 
 
 func _on_close_pressed() -> void:
@@ -107,18 +146,56 @@ func _on_combat_result_received(result: Dictionary) -> void:
 
 	var errors := PackedStringArray(result.get("errors", []))
 	status_label.text = "%s: %s" % [String(_active_payload.get("failure_text", "Failed")), ", ".join(errors)]
+	_show_hints(result.get("hints", []))
 	if _interaction_type == "chest" or _interaction_type == "altar":
 		run_button.disabled = false
 		return
 
 	await get_tree().create_timer(1.2, true).timeout
-	interaction_resolved.emit(false, {"interaction_type": _interaction_type, "attack_mode": String(_active_payload.get("attack_mode", "melee")), "success": false, "errors": result.get("errors", []), "damage_to_player": 20})
+	interaction_resolved.emit(
+		false,
+		{
+			"interaction_type": _interaction_type,
+			"attack_mode": String(_active_payload.get("attack_mode", "melee")),
+			"success": false,
+			"errors": result.get("errors", []),
+			"hints": result.get("hints", []),
+			"damage_to_player": 20,
+			"suggested_difficulty": String(result.get("suggested_difficulty", _active_payload.get("difficulty", "easy"))),
+			"attempt_id": String(result.get("attempt_id", ""))
+		}
+	)
 	hide_terminal()
+
+
+func _on_hint_result_received(result: Dictionary) -> void:
+	_hint_request_in_flight = false
+	hint_button.disabled = false
+	_show_hints(result.get("hints", []))
+
+
+func _show_hints(hints_variant: Variant) -> void:
+	if typeof(hints_variant) != TYPE_ARRAY:
+		hint_label.visible = false
+		hint_label.text = ""
+		return
+	var hints: Array = hints_variant
+	if hints.is_empty():
+		hint_label.visible = false
+		hint_label.text = ""
+		return
+	var rendered_hints: PackedStringArray = []
+	for hint_variant in hints:
+		rendered_hints.append("- %s" % String(hint_variant))
+	hint_label.visible = true
+	hint_label.text = "Hints:\n%s" % "\n".join(rendered_hints)
 
 
 func _on_request_failed(message: String) -> void:
 	_request_in_flight = false
+	_hint_request_in_flight = false
 	run_button.disabled = false
+	hint_button.disabled = false
 	status_label.text = message
 
 
@@ -157,3 +234,13 @@ func _default_snippet_for_theme(theme: String) -> String:
 			return "stamina = 3\nif stamina > 0:\n    for _i in range(stamina):\n        print('strike')"
 		_:
 			return "damage = 15\nspeed = 4"
+
+
+func _fallback_suggested_difficulty(current_difficulty: String) -> String:
+	match current_difficulty:
+		"hard":
+			return "normal"
+		"normal":
+			return "easy"
+		_:
+			return "easy"

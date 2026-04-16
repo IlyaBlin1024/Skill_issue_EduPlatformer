@@ -40,6 +40,12 @@ custom_minimum_size = Vector2(0, 320)
 layout_mode = 2
 placeholder_text = "Write Python-like code here..."
 
+[node name="HintLabel" type="Label" parent="Panel/Margin/VBox"]
+visible = false
+layout_mode = 2
+autowrap_mode = 3
+text = ""
+
 [node name="Actions" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1549933143]
 layout_mode = 2
 theme_override_constants/separation = 12
@@ -47,6 +53,10 @@ theme_override_constants/separation = 12
 [node name="RunButton" type="Button" parent="Panel/Margin/VBox/Actions" unique_id=774544425]
 layout_mode = 2
 text = "Run"
+
+[node name="HintButton" type="Button" parent="Panel/Margin/VBox/Actions"]
+layout_mode = 2
+text = "Hint"
 
 [node name="CloseButton" type="Button" parent="Panel/Margin/VBox/Actions" unique_id=192412833]
 layout_mode = 2

@@ -5,6 +5,8 @@ class_name GameHud
 @onready var health_label: Label = $Margin/VBox/HealthLabel
 @onready var health_bar: ProgressBar = $Margin/VBox/HealthBar
 @onready var enemy_counter_label: Label = $Margin/VBox/EnemyCounterLabel
+@onready var room_label: Label = $Margin/VBox/RoomLabel
+@onready var objective_label: Label = $Margin/VBox/ObjectiveLabel
 @onready var boss_status_label: Label = $Margin/VBox/BossStatusLabel
 @onready var message_label: Label = $Margin/VBox/MessageLabel
 
@@ -20,6 +22,16 @@ func update_health(current_health: int, max_health: int) -> void:
 func update_enemy_counter(remaining_enemies: int, total_enemies: int) -> void:
 	enemy_counter_label.text = "Sentries Remaining: %d / %d" % [remaining_enemies, total_enemies]
 	enemy_counter_label.visible = total_enemies > 0
+
+
+func set_room_context(room_title: String) -> void:
+	room_label.text = room_title
+	room_label.visible = not room_title.is_empty()
+
+
+func set_objective(text: String) -> void:
+	objective_label.text = text
+	objective_label.visible = not text.is_empty()
 
 
 func set_boss_status(text: String) -> void:

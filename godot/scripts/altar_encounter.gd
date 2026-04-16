@@ -5,6 +5,11 @@ signal altar_started(altar: AltarEncounter, payload: Dictionary)
 signal weapon_forged(altar: AltarEncounter, weapon_summary: String)
 
 @export var level_theme: String = "variables"
+@export var terminal_title: String = "Forge Terminal"
+@export var terminal_status_text: String = "Write weapon setup code to forge a new blade."
+@export var terminal_success_text: String = "Weapon forged."
+@export var terminal_failure_text: String = "Forge rejected the pattern."
+@export var terminal_starter_code: String = ""
 
 @onready var visual: ColorRect = $Visual
 @onready var label: Label = $Label
@@ -20,6 +25,11 @@ func _ready() -> void:
 
 func configure(config: Dictionary) -> void:
 	level_theme = String(config.get("level_theme", level_theme))
+	terminal_title = String(config.get("terminal_title", terminal_title))
+	terminal_status_text = String(config.get("terminal_status_text", terminal_status_text))
+	terminal_success_text = String(config.get("terminal_success_text", terminal_success_text))
+	terminal_failure_text = String(config.get("terminal_failure_text", terminal_failure_text))
+	terminal_starter_code = String(config.get("terminal_starter_code", terminal_starter_code))
 	var position_data: Array = config.get("position", [])
 	if position_data.size() == 2:
 		global_position = Vector2(float(position_data[0]), float(position_data[1]))
@@ -36,12 +46,13 @@ func _on_body_entered(body: Node) -> void:
 			{
 				"interaction_type": "altar",
 				"level_theme": level_theme,
-				"title": "Forge Terminal",
-				"status_text": "Write weapon setup code to forge a new blade.",
-				"success_text": "Weapon forged.",
-				"failure_text": "Forge rejected the pattern.",
+				"title": terminal_title,
+				"status_text": terminal_status_text,
+				"success_text": terminal_success_text,
+				"failure_text": terminal_failure_text,
 				"time_limit": 0,
 				"timer_enabled": false,
+				"starter_code": terminal_starter_code
 			}
 		)
 

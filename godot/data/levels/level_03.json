@@ -1,0 +1,102 @@
+{
+  "id": "level_03",
+  "title": "Loops",
+  "intro_message": "Level 3: descend into the conduit, break the wave sentries, then reach the conduit gate.",
+  "encounter_remaining_message": "Wave sentries still cycle through the conduit.",
+  "exit_unlocked_message": "Conduit gate opened. Follow the cleared loop path upward.",
+  "level_complete_message": "Level 3 clear. Loop control stabilized.",
+  "encounter_cancelled_message": "Encounter cancelled.",
+  "respawn_message": "Respawn complete.",
+  "defeat_message": "Knight integrity lost. Respawning...",
+  "player_damage_on_failure": 24,
+  "enemy_count_min": 16,
+  "enemy_count_max": 20,
+  "enemy_archetypes": [
+    {
+      "level_theme": "loops",
+      "difficulty": "normal",
+      "attack_style": "melee",
+      "color": [0.760784, 0.329412, 0.384314, 1.0],
+      "patrol_distance": 60,
+      "patrol_speed": 80,
+      "chase_speed": 114,
+      "vision_range": 340,
+      "aggro_range": 340,
+      "melee_range": 72,
+      "ranged_range": 0,
+      "vertical_tolerance": 176,
+      "vision_enter_range_multiplier": 1.0,
+      "vision_exit_range_multiplier": 1.12,
+      "vision_enter_vertical_multiplier": 1.0,
+      "vision_exit_vertical_multiplier": 1.14,
+      "attack_interval": 1.0,
+      "melee_damage": 13,
+      "ranged_damage": 0,
+      "projectile_speed": 0
+    },
+    {
+      "level_theme": "loops",
+      "difficulty": "hard",
+      "attack_style": "ranged",
+      "color": [0.643137, 0.439216, 0.239216, 1.0],
+      "patrol_distance": 74,
+      "patrol_speed": 72,
+      "chase_speed": 92,
+      "vision_range": 470,
+      "aggro_range": 470,
+      "melee_range": 40,
+      "ranged_attack_range": 430,
+      "ranged_range": 320,
+      "vertical_tolerance": 256,
+      "vision_enter_range_multiplier": 1.0,
+      "vision_exit_range_multiplier": 1.24,
+      "vision_enter_vertical_multiplier": 1.0,
+      "vision_exit_vertical_multiplier": 1.28,
+      "attack_interval": 1.35,
+      "melee_damage": 7,
+      "ranged_damage": 11,
+      "projectile_speed": 360
+    }
+  ],
+  "generation": {
+    "room_count_min": 13,
+    "room_count_max": 16,
+    "min_critical_path_rooms": 7,
+    "columns": 4,
+    "rows": 5,
+    "room_width": 520,
+    "room_height": 320,
+    "spacing_x": 1480,
+    "spacing_y": 620,
+    "origin_x": 380,
+    "origin_y": 780
+  },
+  "adaptive_defaults": {
+    "combat": "normal",
+    "chest": "easy",
+    "altar": "normal",
+    "boss": "hard"
+  },
+  "chests": [
+    {
+      "node_name": "ChestA",
+      "level_theme": "loops",
+      "reward_text": "Chest reward: +1 cycle shard recovered."
+    },
+    {
+      "node_name": "ChestB",
+      "level_theme": "loops",
+      "reward_text": "Chest reward: +1 conduit sigil recovered."
+    }
+  ],
+  "altars": [
+    {
+      "node_name": "AltarA",
+      "level_theme": "loops"
+    }
+  ],
+  "exit": {
+    "locked_text": "Locked",
+    "ready_text": "Exit"
+  }
+}

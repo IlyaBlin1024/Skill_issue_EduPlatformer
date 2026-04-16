@@ -10,6 +10,7 @@ var damage: int = 8
 var direction := Vector2.LEFT
 var max_travel_distance: float = 520.0
 var target_kind: String = "player"
+var source_enemy: EnemyEncounter = null
 
 var _travelled_distance := 0.0
 var _collision: CollisionShape2D
@@ -62,6 +63,8 @@ func _on_body_entered(body: Node) -> void:
 		_expire()
 		return
 	if target_kind == "player" and body is PlayerController:
+		if (body as PlayerController).try_reflect_projectile(self):
+			return
 		target_hit.emit(self, body, damage)
 		_expire()
 
@@ -75,3 +78,19 @@ func _on_area_entered(area: Area2D) -> void:
 func _expire() -> void:
 	projectile_expired.emit(self)
 	queue_free()
+
+
+func reflect_to_source() -> bool:
+	if source_enemy == null or not is_instance_valid(source_enemy) or source_enemy.is_defeated():
+		return false
+	var reflected_direction: Vector2 = source_enemy.global_position - global_position
+	if reflected_direction.is_zero_approx():
+		reflected_direction = Vector2.RIGHT
+	direction = reflected_direction.normalized()
+	target_kind = "enemy"
+	speed *= 1.15
+	damage = maxi(int(round(float(damage) * 1.15)), damage + 1)
+	_travelled_distance = 0.0
+	if _visual != null:
+		_visual.color = Color(0.72, 1.0, 0.88, 1.0)
+	return true

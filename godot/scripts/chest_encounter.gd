@@ -6,6 +6,11 @@ signal chest_opened(chest: ChestEncounter, reward_text: String)
 
 @export var level_theme: String = "variables"
 @export var reward_text: String = "Recovered a syntax shard."
+@export var terminal_title: String = "Hack Terminal"
+@export var terminal_status_text: String = "Solve the chest script to unlock the reward."
+@export var terminal_success_text: String = "Chest unlocked."
+@export var terminal_failure_text: String = "Chest remains sealed."
+@export var terminal_starter_code: String = ""
 
 @onready var visual: ColorRect = $Visual
 @onready var label: Label = $Label
@@ -23,6 +28,11 @@ func _ready() -> void:
 func configure(config: Dictionary) -> void:
 	level_theme = String(config.get("level_theme", level_theme))
 	reward_text = String(config.get("reward_text", reward_text))
+	terminal_title = String(config.get("terminal_title", terminal_title))
+	terminal_status_text = String(config.get("terminal_status_text", terminal_status_text))
+	terminal_success_text = String(config.get("terminal_success_text", terminal_success_text))
+	terminal_failure_text = String(config.get("terminal_failure_text", terminal_failure_text))
+	terminal_starter_code = String(config.get("terminal_starter_code", terminal_starter_code))
 	var position_data: Array = config.get("position", [])
 	if position_data.size() == 2:
 		global_position = Vector2(float(position_data[0]), float(position_data[1]))
@@ -39,12 +49,13 @@ func _on_body_entered(body: Node) -> void:
 			{
 				"interaction_type": "chest",
 				"level_theme": level_theme,
-				"title": "Hack Terminal",
-				"status_text": "Solve the chest script to unlock the reward.",
-				"success_text": "Chest unlocked.",
-				"failure_text": "Chest remains sealed.",
+				"title": terminal_title,
+				"status_text": terminal_status_text,
+				"success_text": terminal_success_text,
+				"failure_text": terminal_failure_text,
 				"time_limit": 0,
 				"timer_enabled": false,
+				"starter_code": terminal_starter_code
 			}
 		)
 

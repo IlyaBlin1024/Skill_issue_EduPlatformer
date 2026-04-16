@@ -1,0 +1,102 @@
+{
+  "id": "level_04",
+  "title": "Functions",
+  "intro_message": "Level 4: enter the codex archive, clear the routine sentries, then reach the function gate.",
+  "encounter_remaining_message": "Routine sentries still guard the codex archive.",
+  "exit_unlocked_message": "Function gate opened. Follow the cleared codex route upward.",
+  "level_complete_message": "Level 4 clear. Function logic stabilized.",
+  "encounter_cancelled_message": "Encounter cancelled.",
+  "respawn_message": "Respawn complete.",
+  "defeat_message": "Knight integrity lost. Respawning...",
+  "player_damage_on_failure": 26,
+  "enemy_count_min": 16,
+  "enemy_count_max": 20,
+  "enemy_archetypes": [
+    {
+      "level_theme": "functions",
+      "difficulty": "normal",
+      "attack_style": "melee",
+      "color": [0.733333, 0.360784, 0.34902, 1.0],
+      "patrol_distance": 62,
+      "patrol_speed": 82,
+      "chase_speed": 118,
+      "vision_range": 350,
+      "aggro_range": 350,
+      "melee_range": 74,
+      "ranged_range": 0,
+      "vertical_tolerance": 182,
+      "vision_enter_range_multiplier": 1.0,
+      "vision_exit_range_multiplier": 1.14,
+      "vision_enter_vertical_multiplier": 1.0,
+      "vision_exit_vertical_multiplier": 1.16,
+      "attack_interval": 0.98,
+      "melee_damage": 14,
+      "ranged_damage": 0,
+      "projectile_speed": 0
+    },
+    {
+      "level_theme": "functions",
+      "difficulty": "hard",
+      "attack_style": "ranged",
+      "color": [0.611765, 0.447059, 0.278431, 1.0],
+      "patrol_distance": 76,
+      "patrol_speed": 74,
+      "chase_speed": 96,
+      "vision_range": 490,
+      "aggro_range": 490,
+      "melee_range": 42,
+      "ranged_attack_range": 440,
+      "ranged_range": 330,
+      "vertical_tolerance": 262,
+      "vision_enter_range_multiplier": 1.0,
+      "vision_exit_range_multiplier": 1.24,
+      "vision_enter_vertical_multiplier": 1.0,
+      "vision_exit_vertical_multiplier": 1.28,
+      "attack_interval": 1.28,
+      "melee_damage": 8,
+      "ranged_damage": 12,
+      "projectile_speed": 372
+    }
+  ],
+  "generation": {
+    "room_count_min": 14,
+    "room_count_max": 16,
+    "min_critical_path_rooms": 7,
+    "columns": 4,
+    "rows": 5,
+    "room_width": 520,
+    "room_height": 320,
+    "spacing_x": 1480,
+    "spacing_y": 620,
+    "origin_x": 380,
+    "origin_y": 780
+  },
+  "adaptive_defaults": {
+    "combat": "normal",
+    "chest": "normal",
+    "altar": "normal",
+    "boss": "hard"
+  },
+  "chests": [
+    {
+      "node_name": "ChestA",
+      "level_theme": "functions",
+      "reward_text": "Chest reward: +1 routine shard recovered."
+    },
+    {
+      "node_name": "ChestB",
+      "level_theme": "functions",
+      "reward_text": "Chest reward: +1 codex sigil recovered."
+    }
+  ],
+  "altars": [
+    {
+      "node_name": "AltarA",
+      "level_theme": "functions"
+    }
+  ],
+  "exit": {
+    "locked_text": "Locked",
+    "ready_text": "Exit"
+  }
+}
