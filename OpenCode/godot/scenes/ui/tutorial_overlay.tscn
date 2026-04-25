@@ -1,0 +1,56 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/tutorial_overlay.gd" id="1_script"]
+
+[node name="TutorialOverlay" type="CanvasLayer"]
+script = ExtResource("1_script")
+
+[node name="Dim" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.62)
+
+[node name="Arrow" type="Label" parent="."]
+offset_left = 620.0
+offset_top = 120.0
+offset_right = 700.0
+offset_bottom = 200.0
+theme_override_font_sizes/font_size = 48
+text = "v"
+horizontal_alignment = 1
+
+[node name="Panel" type="PanelContainer" parent="."]
+offset_left = 100.0
+offset_top = 500.0
+offset_right = 1180.0
+offset_bottom = 690.0
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 18
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Body" type="RichTextLabel" parent="Panel/Margin/VBox"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+autowrap_mode = 3
+text = ""
+
+[node name="NextButton" type="Button" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Continue"

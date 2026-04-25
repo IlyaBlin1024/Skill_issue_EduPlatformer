@@ -1,0 +1,191 @@
+[gd_scene format=3 uid="uid://bgp0gm3hraadj"]
+
+[ext_resource type="Script" uid="uid://dh3eih61rb21v" path="res://scripts/combat_terminal.gd" id="1_terminal_script"]
+
+[node name="CombatTerminal" type="CanvasLayer" unique_id=1498571445]
+script = ExtResource("1_terminal_script")
+
+[node name="ExplanationBackdrop" type="ColorRect" parent="."]
+visible = false
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.0509804, 0.0470588, 0.0862745, 0.96)
+
+[node name="Panel" type="PanelContainer" parent="." unique_id=145788979]
+visible = false
+anchor_left = 0.12
+anchor_top = 0.08
+anchor_right = 0.88
+anchor_bottom = 0.92
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=2066338209]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1824055717]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Panel/Margin/VBox" unique_id=112154126]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+horizontal_alignment = 1
+text = "Combat Terminal"
+
+[node name="SourceLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+horizontal_alignment = 1
+text = "Source: ..."
+
+[node name="StatusScroll" type="ScrollContainer" parent="Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 108)
+layout_mode = 2
+size_flags_horizontal = 3
+vertical_scroll_mode = 1
+
+[node name="Status" type="RichTextLabel" parent="Panel/Margin/VBox/StatusScroll" unique_id=1442414547]
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+fit_content = true
+autowrap_mode = 3
+text = "Encounter ready."
+
+[node name="TimerLabel" type="Label" parent="Panel/Margin/VBox" unique_id=236121002]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Time: 180"
+
+[node name="CodeEditor" type="TextEdit" parent="Panel/Margin/VBox" unique_id=1687483697]
+custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+size_flags_vertical = 3
+placeholder_text = "Write Python-like code here..."
+
+[node name="HintScroll" type="ScrollContainer" parent="Panel/Margin/VBox"]
+visible = false
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+vertical_scroll_mode = 1
+
+[node name="HintLabel" type="Label" parent="Panel/Margin/VBox/HintScroll"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+text = ""
+
+[node name="Actions" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1549933143]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RunButton" type="Button" parent="Panel/Margin/VBox/Actions" unique_id=774544425]
+layout_mode = 2
+text = "Run"
+
+[node name="HintButton" type="Button" parent="Panel/Margin/VBox/Actions"]
+layout_mode = 2
+text = "Hint"
+
+[node name="ExplanationButton" type="Button" parent="Panel/Margin/VBox/Actions"]
+layout_mode = 2
+text = "Explonation"
+
+[node name="CloseButton" type="Button" parent="Panel/Margin/VBox/Actions" unique_id=192412833]
+layout_mode = 2
+text = "Close"
+
+[node name="HelpPanel" type="PanelContainer" parent="." unique_id=1915037741]
+visible = false
+offset_left = 180.0
+offset_top = 48.0
+offset_right = 1100.0
+offset_bottom = 672.0
+
+[node name="Margin" type="MarginContainer" parent="HelpPanel" unique_id=179339482]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="HelpPanel/Margin" unique_id=1612131014]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="HelpPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HelpTitle" type="Label" parent="HelpPanel/Margin/VBox/Header" unique_id=112314001]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Python Guide"
+
+[node name="HelpCloseButton" type="Button" parent="HelpPanel/Margin/VBox/Header"]
+layout_mode = 2
+text = "Close"
+
+[node name="ThemeLabel" type="Label" parent="HelpPanel/Margin/VBox" unique_id=374319221]
+layout_mode = 2
+autowrap_mode = 3
+text = "Theme: Variables"
+
+[node name="Scroll" type="ScrollContainer" parent="HelpPanel/Margin/VBox" unique_id=115873349]
+custom_minimum_size = Vector2(0, 450)
+layout_mode = 2
+size_flags_vertical = 3
+vertical_scroll_mode = 1
+
+[node name="ScrollVBox" type="VBoxContainer" parent="HelpPanel/Margin/VBox/Scroll" unique_id=168721004]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="ThemeBody" type="RichTextLabel" parent="HelpPanel/Margin/VBox/Scroll/ScrollVBox" unique_id=117490335]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+autowrap_mode = 3
+text = ""
+
+[node name="LanguageLabel" type="Label" parent="HelpPanel/Margin/VBox/Scroll/ScrollVBox" unique_id=618632335]
+layout_mode = 2
+autowrap_mode = 3
+text = "Python uses indentation instead of braces."
+
+[node name="RulesLabel" type="Label" parent="HelpPanel/Margin/VBox/Scroll/ScrollVBox" unique_id=612383513]
+layout_mode = 2
+autowrap_mode = 3
+text = ""
+
+[node name="ExampleLabel" type="RichTextLabel" parent="HelpPanel/Margin/VBox/Scroll/ScrollVBox" unique_id=209337411]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+autowrap_mode = 3
+text = ""
+
+[node name="ScrollButtons" type="HBoxContainer" parent="HelpPanel/Margin/VBox" unique_id=707145511]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="ScrollUpButton" type="Button" parent="HelpPanel/Margin/VBox/ScrollButtons" unique_id=57123102]
+layout_mode = 2
+text = "Up"
+
+[node name="ScrollDownButton" type="Button" parent="HelpPanel/Margin/VBox/ScrollButtons" unique_id=117000421]
+layout_mode = 2
+text = "Down"

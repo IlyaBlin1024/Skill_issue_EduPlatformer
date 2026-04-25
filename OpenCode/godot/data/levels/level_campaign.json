@@ -1,0 +1,34 @@
+{
+  "levels": [
+    {
+      "id": "level_01",
+      "title": "Variables",
+      "path": "res://data/levels/level_01.json",
+      "focus": "assign values and tune combat parameters"
+    },
+    {
+      "id": "level_02",
+      "title": "If/Else",
+      "path": "res://data/levels/level_02.json",
+      "focus": "branch actions based on game state"
+    },
+    {
+      "id": "level_03",
+      "title": "Loops",
+      "path": "res://data/levels/level_03.json",
+      "focus": "repeat actions with for and while"
+    },
+    {
+      "id": "level_04",
+      "title": "Functions",
+      "path": "res://data/levels/level_04.json",
+      "focus": "package logic into reusable functions"
+    },
+    {
+      "id": "level_05",
+      "title": "Integration",
+      "path": "res://data/levels/level_05.json",
+      "focus": "combine variables, branches, loops and functions"
+    }
+  ]
+}

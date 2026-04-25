@@ -1,0 +1,182 @@
+{
+  "id": "level_02",
+  "level_number": 2,
+  "title": "If/Else",
+  "concept_summary": "branch actions based on game state",
+  "intro_message": "Level 2: descend through the logic archive, resolve the sentries, then reach the exit chamber.",
+  "encounter_remaining_message": "Logic sentries still guard the archive.",
+  "exit_unlocked_message": "Exit chamber opened. Follow the cleared route upward.",
+  "level_complete_message": "Level 2 clear. Condition branches stabilized.",
+  "encounter_cancelled_message": "Encounter cancelled.",
+  "respawn_message": "Respawn complete.",
+  "defeat_message": "Knight integrity lost. Respawning...",
+  "boss_intro_message": "Boss chamber reached. Decode the false branches and defeat the Logic Spider.",
+  "boss_defeated_message": "Logic Spider collapsed into severed threads.",
+  "player_damage_on_failure": 22,
+  "enemy_count_min": 15,
+  "enemy_count_max": 19,
+  "enemy_archetypes": [
+    {
+      "level_theme": "conditions",
+      "difficulty": "easy",
+      "attack_style": "melee",
+      "color": [0.760784, 0.341176, 0.352941, 1.0],
+      "patrol_distance": 56,
+      "patrol_speed": 76,
+      "chase_speed": 108,
+      "vision_range": 320,
+      "aggro_range": 320,
+      "melee_range": 68,
+      "ranged_range": 0,
+      "vertical_tolerance": 170,
+      "vision_enter_range_multiplier": 1.0,
+      "vision_exit_range_multiplier": 1.12,
+      "vision_enter_vertical_multiplier": 1.0,
+      "vision_exit_vertical_multiplier": 1.12,
+      "attack_interval": 1.05,
+      "melee_damage": 12,
+      "ranged_damage": 0,
+      "projectile_speed": 0
+    },
+    {
+      "level_theme": "conditions",
+      "difficulty": "normal",
+      "attack_style": "ranged",
+      "color": [0.666667, 0.411765, 0.235294, 1.0],
+      "patrol_distance": 70,
+      "patrol_speed": 70,
+      "chase_speed": 88,
+      "vision_range": 460,
+      "aggro_range": 460,
+      "melee_range": 38,
+      "ranged_attack_range": 420,
+      "ranged_range": 300,
+      "vertical_tolerance": 250,
+      "vision_enter_range_multiplier": 1.0,
+      "vision_exit_range_multiplier": 1.22,
+      "vision_enter_vertical_multiplier": 1.0,
+      "vision_exit_vertical_multiplier": 1.26,
+      "attack_interval": 1.45,
+      "melee_damage": 7,
+      "ranged_damage": 10,
+      "projectile_speed": 350
+    }
+  ],
+  "generation": {
+    "room_count_min": 13,
+    "room_count_max": 16,
+    "min_critical_path_rooms": 7,
+    "columns": 4,
+    "rows": 5,
+    "room_width": 520,
+    "room_height": 320,
+    "spacing_x": 1480,
+    "spacing_y": 620,
+    "origin_x": 380,
+    "origin_y": 780
+  },
+  "adaptive_defaults": {
+    "combat": "normal",
+    "chest": "easy",
+    "altar": "easy",
+    "boss": "normal"
+  },
+  "chests": [
+    {
+      "node_name": "ChestA",
+      "level_theme": "conditions",
+      "reward_text": "Chest reward: +1 branch shard recovered."
+    },
+    {
+      "node_name": "ChestB",
+      "level_theme": "conditions",
+      "reward_text": "Chest reward: +1 decision sigil recovered."
+    }
+  ],
+  "altars": [
+    {
+      "node_name": "AltarA",
+      "level_theme": "conditions"
+    }
+  ],
+  "exit": {
+    "locked_text": "Locked",
+    "ready_text": "Exit"
+  },
+  "boss": {
+    "boss_name": "Logic Spider",
+    "boss_brief": "A false-branch predator that weaponizes bad decisions.",
+    "mechanic_summary": "Read state changes and branch your tactic correctly.",
+    "mechanic_type": "logic_spider",
+    "level_theme": "conditions",
+    "difficulty": "normal",
+	"position": [1440, 909],
+    "arena_spawn": [280, 960],
+    "max_health": 360,
+    "color": [0.352941, 0.603922, 0.431373, 1.0],
+    "move_speed": 244,
+    "jump_force": -490,
+    "gravity": 1180,
+    "jump_interval": 0.82,
+    "attack_interval": 0.86,
+    "reposition_interval": 0.9,
+    "melee_range": 88,
+    "ranged_range": 450,
+    "vertical_tolerance": 300,
+    "melee_damage": 20,
+    "ranged_damage": 16,
+    "projectile_speed": 430,
+    "strategy_attack_budget": 6,
+    "logic_branch_interval": 2.35,
+    "max_overdrive_level": 3,
+    "overdrive_tick_interval": 3.1,
+    "overdrive_move_multiplier": 1.13,
+    "overdrive_damage_multiplier": 1.17,
+    "overdrive_attack_speed_multiplier": 0.9,
+    "arena_left": 96,
+    "arena_right": 1824,
+    "anchor_points": [220, 460, 720, 980, 1260, 1560, 1780],
+    "arena_layout": {
+      "mist_top": 120,
+      "mist_bottom": 910,
+      "mist_alpha": 0.18,
+      "platforms": [
+        {"x": 280, "y": 860, "width": 220},
+        {"x": 560, "y": 620, "width": 170},
+        {"x": 960, "y": 710, "width": 290},
+        {"x": 1360, "y": 620, "width": 170},
+        {"x": 1640, "y": 860, "width": 220}
+      ]
+    },
+    "environment": {
+      "backdrop_color": [0.105882, 0.160784, 0.145098, 1.0],
+      "mist_color": [0.141176, 0.360784, 0.27451, 0.16],
+      "floor_color": [0.14902, 0.223529, 0.219608, 1.0],
+      "ceiling_color": [0.14902, 0.223529, 0.219608, 1.0],
+      "wall_color": [0.0901961, 0.14902, 0.14902, 1.0],
+      "platform_color": [0.207843, 0.321569, 0.294118, 1.0]
+    },
+    "terminal": {
+      "title": "Boss Terminal: If / Else",
+      "intro_status_text": "Write a branch that reacts to the Spider's shifting state.",
+      "reprogram_status_text": "Adjust the branch while the Spider swaps patterns.",
+      "success_text": "Conditional tactic accepted.",
+      "failure_text": "The Spider twists your branch into a trap."
+    },
+    "feedback": {
+      "start_battle": "Logic Spider drops into the arena and begins weaving false paths.",
+      "reposition": "Logic Spider snaps to a new branch lane.",
+      "melee_attack": "Logic Spider pierces through your guard for %d damage.",
+      "ranged_attack": "Logic Spider launches a false-logic bolt.",
+      "projectile_hit": "False-logic bolt hits for %d damage."
+    },
+    "dialogue": {
+      "intro_boss": "Logic Spider: Every choice you make already leads to my web.",
+      "intro_player": "Skill Issue: Only if the condition is wrong.",
+      "rewrite_boss": "Logic Spider: Truth and falsehood are only threads to me.",
+      "rewrite_player": "Skill Issue: Then I'll cut the thread that doesn't belong.",
+      "defeat_boss": "Logic Spider: The true branch... was never mine.",
+      "defeat_player": "Skill Issue: Then the path opens."
+    }
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "id": "level_01",
+  "level_number": 1,
+  "title": "Variables",
+  "concept_summary": "assign values and tune combat parameters",
+  "intro_message": "Level 1: explore the archive, clear the sentries, then reach the exit chamber.",
+  "encounter_remaining_message": "Sentries still remain in the archive.",
+  "exit_unlocked_message": "Exit chamber opened. Climb to the marked room.",
+  "level_complete_message": "Level 1 clear. Variables secured.",
+  "encounter_cancelled_message": "Encounter cancelled.",
+  "respawn_message": "Respawn complete.",
+  "defeat_message": "Knight integrity lost. Respawning...",
+  "boss_intro_message": "Boss chamber reached. Reprogram and defeat the Threshold Warden.",
+  "boss_defeated_message": "Threshold Warden collapsed.",
+  "player_damage_on_failure": 20,
+  "enemy_count_min": 14,
+  "enemy_count_max": 18,
+  "enemy_archetypes": [
+	{
+	  "level_theme": "variables",
+	  "difficulty": "easy",
+	  "attack_style": "melee",
+	  "color": [0.788235, 0.278431, 0.321569, 1.0],
+	  "patrol_distance": 52,
+	  "patrol_speed": 72,
+	  "chase_speed": 102,
+	  "vision_range": 300,
+	  "aggro_range": 300,
+	  "melee_range": 64,
+	  "ranged_range": 0,
+	  "vertical_tolerance": 160,
+	  "vision_enter_range_multiplier": 1.0,
+	  "vision_exit_range_multiplier": 1.1,
+	  "vision_enter_vertical_multiplier": 0.95,
+	  "vision_exit_vertical_multiplier": 1.1,
+	  "attack_interval": 1.1,
+	  "melee_damage": 10,
+	  "ranged_damage": 0,
+	  "projectile_speed": 0
+	},
+	{
+	  "level_theme": "variables",
+	  "difficulty": "normal",
+	  "attack_style": "ranged",
+	  "color": [0.721569, 0.34902, 0.219608, 1.0],
+	  "patrol_distance": 64,
+	  "patrol_speed": 68,
+	  "chase_speed": 84,
+	  "vision_range": 440,
+	  "aggro_range": 440,
+	  "melee_range": 34,
+	  "ranged_attack_range": 380,
+	  "ranged_range": 280,
+	  "vertical_tolerance": 240,
+	  "vision_enter_range_multiplier": 1.0,
+	  "vision_exit_range_multiplier": 1.2,
+	  "vision_enter_vertical_multiplier": 1.0,
+	  "vision_exit_vertical_multiplier": 1.25,
+	  "attack_interval": 1.6,
+	  "melee_damage": 6,
+	  "ranged_damage": 9,
+	  "projectile_speed": 330
+	}
+  ],
+  "generation": {
+	"room_count_min": 12,
+	"room_count_max": 16,
+	"min_critical_path_rooms": 6,
+	"columns": 4,
+	"rows": 5,
+	"room_width": 520,
+	"room_height": 320,
+	"spacing_x": 1480,
+	"spacing_y": 620,
+	"origin_x": 380,
+	"origin_y": 780
+  },
+  "chests": [
+	{
+	  "node_name": "ChestA",
+	  "level_theme": "variables",
+	  "reward_text": "Chest reward: +1 hint shard recovered."
+	},
+	{
+	  "node_name": "ChestB",
+	  "level_theme": "variables",
+	  "reward_text": "Chest reward: +1 archive sigil recovered."
+	}
+  ],
+  "altars": [
+	{
+	  "node_name": "AltarA",
+	  "level_theme": "variables"
+	}
+  ],
+  "exit": {
+	"locked_text": "Locked",
+	"ready_text": "Exit"
+  },
+  "boss": {
+	"boss_name": "Threshold Warden",
+	"boss_brief": "A rigid guardian that refuses to let values change.",
+	"mechanic_summary": "Tune tactic variables before and during the fight.",
+	"mechanic_type": "threshold_warden",
+	"level_theme": "variables",
+	"difficulty": "normal",
+	"position": [1440, 909],
+	"arena_spawn": [280, 960],
+	"max_health": 320,
+	"color": [0.607843, 0.270588, 0.682353, 1.0],
+	"move_speed": 228,
+	"jump_force": -470,
+	"gravity": 1180,
+	"jump_interval": 0.95,
+	"attack_interval": 0.95,
+	"reposition_interval": 1.1,
+	"melee_range": 82,
+	"ranged_range": 420,
+	"vertical_tolerance": 280,
+	"melee_damage": 18,
+	"ranged_damage": 14,
+	"projectile_speed": 410,
+	"strategy_attack_budget": 7,
+	"threshold_health_steps": [0.75, 0.5, 0.25],
+	"max_overdrive_level": 3,
+	"overdrive_tick_interval": 3.4,
+	"overdrive_move_multiplier": 1.12,
+	"overdrive_damage_multiplier": 1.16,
+	"overdrive_attack_speed_multiplier": 0.92,
+	"arena_left": 96,
+	"arena_right": 1824,
+	"anchor_points": [240, 520, 860, 1200, 1540, 1760],
+	"arena_layout": {
+	  "mist_top": 138,
+	  "mist_bottom": 930,
+	  "mist_alpha": 0.14,
+	  "platforms": [
+		{"x": 300, "y": 848, "width": 230},
+		{"x": 630, "y": 720, "width": 210},
+		{"x": 960, "y": 582, "width": 260},
+		{"x": 1290, "y": 720, "width": 210},
+		{"x": 1620, "y": 848, "width": 230}
+	  ]
+	},
+	"environment": {
+	  "backdrop_color": [0.160784, 0.152941, 0.223529, 1.0],
+	  "mist_color": [0.290196, 0.219608, 0.372549, 0.14],
+	  "floor_color": [0.262745, 0.211765, 0.337255, 1.0],
+	  "ceiling_color": [0.262745, 0.211765, 0.337255, 1.0],
+	  "wall_color": [0.196078, 0.156863, 0.247059, 1.0],
+	  "platform_color": [0.345098, 0.27451, 0.415686, 1.0]
+	},
+	"terminal": {
+	  "title": "Boss Terminal: Variables",
+	  "intro_status_text": "Set core values before the Warden locks the arena.",
+	  "reprogram_status_text": "Retune your values while the Warden rewrites the field.",
+	  "success_text": "Variable set accepted. Tactic deployed.",
+	  "failure_text": "The Warden rejects unstable values."
+	},
+	"feedback": {
+	  "start_battle": "Threshold Warden starts circling the archive lanes.",
+	  "reposition": "Threshold Warden vaults to a new lane.",
+	  "melee_attack": "Threshold Warden slams into you for %d damage.",
+	  "ranged_attack": "Threshold Warden hurls a rewritten pulse.",
+	  "projectile_hit": "Archive pulse lands for %d damage."
+	},
+	"dialogue": {
+	  "intro_boss": "Threshold Warden: A value set once should remain unchanged.",
+	  "intro_player": "Skill Issue: Then you were built to lose. Code lives because values can change.",
+	  "rewrite_boss": "Threshold Warden: You rewrite because your first state was weak.",
+	  "rewrite_player": "Skill Issue: I rewrite because adaptation is the point.",
+	  "defeat_boss": "Threshold Warden: A variable is not corruption... it is choice.",
+	  "defeat_player": "Skill Issue: Then let the archive move forward."
+	}
+  }
+}

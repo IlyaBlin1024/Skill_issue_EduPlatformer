@@ -1,0 +1,208 @@
+[gd_scene format=3 uid="uid://mainscene"]
+
+[ext_resource type="PackedScene" uid="uid://playerscene" path="res://scenes/player.tscn" id="1_player"]
+[ext_resource type="Script" uid="uid://cew5yp5jhw43p" path="res://scripts/game.gd" id="2_game"]
+[ext_resource type="PackedScene" uid="uid://bgp0gm3hraadj" path="res://scenes/ui/combat_terminal.tscn" id="3_terminal"]
+[ext_resource type="Script" uid="uid://dcxt5osvbwmrm" path="res://scripts/enemy_encounter.gd" id="4_encounter"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="5_hud"]
+[ext_resource type="Script" uid="uid://cjticanwryw65" path="res://scripts/level_exit.gd" id="6_exit"]
+[ext_resource type="Script" uid="uid://b7l65cfh88ps0" path="res://scripts/chest_encounter.gd" id="7_chest"]
+[ext_resource type="Script" uid="uid://skpwbfhtt4lj" path="res://scripts/altar_encounter.gd" id="8_altar"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_altar"]
+size = Vector2(84, 56)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_chest"]
+size = Vector2(72, 54)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_enemy"]
+size = Vector2(28, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_exit"]
+size = Vector2(88, 120)
+
+[node name="Main" type="Node2D" unique_id=1286498969]
+script = ExtResource("2_game")
+
+[node name="Backdrop" type="ColorRect" parent="." unique_id=1473821394]
+offset_left = -128.0
+offset_top = -1024.0
+offset_right = 2816.0
+offset_bottom = 768.0
+color = Color(0.316, 0.332, 0.392, 1)
+
+[node name="LevelGeometry" type="Node2D" parent="." unique_id=1475001200]
+
+[node name="AltarA" type="Area2D" parent="." unique_id=850525882]
+position = Vector2(120, 540)
+script = ExtResource("8_altar")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AltarA" unique_id=1094156724]
+shape = SubResource("RectangleShape2D_altar")
+
+[node name="Visual" type="ColorRect" parent="AltarA" unique_id=2034009484]
+offset_left = -34.0
+offset_top = -26.0
+offset_right = 34.0
+offset_bottom = 22.0
+color = Color(0.364706, 0.627451, 0.847059, 1)
+
+[node name="Label" type="Label" parent="AltarA" unique_id=1237038611]
+offset_left = -36.0
+offset_top = -58.0
+offset_right = 40.0
+offset_bottom = -30.0
+text = "ALTAR"
+horizontal_alignment = 1
+
+[node name="ChestA" type="Area2D" parent="." unique_id=2063100625]
+position = Vector2(240, 420)
+script = ExtResource("7_chest")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ChestA" unique_id=2124096655]
+shape = SubResource("RectangleShape2D_chest")
+
+[node name="Visual" type="ColorRect" parent="ChestA" unique_id=1115231189]
+offset_left = -28.0
+offset_top = -24.0
+offset_right = 28.0
+offset_bottom = 20.0
+color = Color(0.847059, 0.666667, 0.27451, 1)
+
+[node name="Label" type="Label" parent="ChestA" unique_id=1369727311]
+offset_left = -34.0
+offset_top = -54.0
+offset_right = 37.0
+offset_bottom = -28.0
+text = "CHEST"
+horizontal_alignment = 1
+
+[node name="ChestB" type="Area2D" parent="." unique_id=1656976839]
+position = Vector2(480, 260)
+script = ExtResource("7_chest")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ChestB" unique_id=2106015177]
+shape = SubResource("RectangleShape2D_chest")
+
+[node name="Visual" type="ColorRect" parent="ChestB" unique_id=2026389550]
+offset_left = -28.0
+offset_top = -24.0
+offset_right = 28.0
+offset_bottom = 20.0
+color = Color(0.847059, 0.666667, 0.27451, 1)
+
+[node name="Label" type="Label" parent="ChestB" unique_id=435729096]
+offset_left = -34.0
+offset_top = -54.0
+offset_right = 37.0
+offset_bottom = -28.0
+text = "CHEST"
+horizontal_alignment = 1
+
+[node name="EnemyEncounterA" type="Area2D" parent="." unique_id=979618903]
+position = Vector2(320, 520)
+script = ExtResource("4_encounter")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyEncounterA" unique_id=1241046250]
+shape = SubResource("RectangleShape2D_enemy")
+
+[node name="Visual" type="ColorRect" parent="EnemyEncounterA" unique_id=1058092567]
+offset_left = -14.0
+offset_top = -24.0
+offset_right = 14.0
+offset_bottom = 24.0
+color = Color(0.788235, 0.278431, 0.321569, 1)
+
+[node name="HpLabel" type="Label" parent="EnemyEncounterA" unique_id=681644677]
+offset_left = -30.0
+offset_top = -60.0
+offset_right = 36.0
+offset_bottom = -34.0
+text = "HP 100"
+horizontal_alignment = 1
+
+[node name="StateLabel" type="Label" parent="EnemyEncounterA" unique_id=1423338263]
+visible = false
+offset_left = -46.0
+offset_top = -84.0
+offset_right = 48.0
+offset_bottom = -62.0
+text = "READY"
+horizontal_alignment = 1
+
+[node name="EnemyEncounterB" type="Area2D" parent="." unique_id=105802520]
+position = Vector2(640, 360)
+script = ExtResource("4_encounter")
+difficulty = "normal"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyEncounterB" unique_id=370325541]
+shape = SubResource("RectangleShape2D_enemy")
+
+[node name="Visual" type="ColorRect" parent="EnemyEncounterB" unique_id=430457436]
+offset_left = -14.0
+offset_top = -24.0
+offset_right = 14.0
+offset_bottom = 24.0
+color = Color(0.721569, 0.34902, 0.219608, 1)
+
+[node name="HpLabel" type="Label" parent="EnemyEncounterB" unique_id=2017959276]
+offset_left = -30.0
+offset_top = -60.0
+offset_right = 36.0
+offset_bottom = -34.0
+text = "HP 150"
+horizontal_alignment = 1
+
+[node name="StateLabel" type="Label" parent="EnemyEncounterB" unique_id=1237454104]
+visible = false
+offset_left = -46.0
+offset_top = -84.0
+offset_right = 48.0
+offset_bottom = -62.0
+text = "READY"
+horizontal_alignment = 1
+
+[node name="LevelExit" type="Area2D" parent="." unique_id=1370493509]
+position = Vector2(760, 220)
+script = ExtResource("6_exit")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LevelExit" unique_id=1697671838]
+shape = SubResource("RectangleShape2D_exit")
+
+[node name="Visual" type="ColorRect" parent="LevelExit" unique_id=1687327501]
+offset_left = -44.0
+offset_top = -60.0
+offset_right = 44.0
+offset_bottom = 60.0
+color = Color(0.32, 0.34, 0.4, 1)
+
+[node name="Label" type="Label" parent="LevelExit" unique_id=454694356]
+offset_left = -39.0
+offset_top = -92.0
+offset_right = 42.0
+offset_bottom = -66.0
+text = "Locked"
+horizontal_alignment = 1
+
+[node name="Player" parent="." unique_id=595223677 instance=ExtResource("1_player")]
+position = Vector2(120, 540)
+
+[node name="CombatTerminal" parent="." unique_id=1324292128 instance=ExtResource("3_terminal")]
+
+[node name="Hud" parent="." unique_id=489770776 instance=ExtResource("5_hud")]
+
+[node name="FadeLayer" type="CanvasLayer" parent="." unique_id=123328119]
+layer = 90
+
+[node name="FadeRect" type="ColorRect" parent="FadeLayer" unique_id=668501411]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)

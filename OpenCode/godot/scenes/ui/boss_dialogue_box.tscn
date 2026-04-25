@@ -1,0 +1,217 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/boss_dialogue_box.gd" id="1_dialogue_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dialogue_panel"]
+bg_color = Color(0.972549, 0.894118, 0.662745, 0.98)
+border_width_left = 8
+border_width_top = 8
+border_width_right = 8
+border_width_bottom = 8
+border_color = Color(0.654902, 0.427451, 0.192157, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_size = 5
+shadow_color = Color(0.2, 0.121569, 0.0509804, 0.2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nameplate"]
+bg_color = Color(0.972549, 0.815686, 0.490196, 1)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0.654902, 0.427451, 0.192157, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_portrait_frame"]
+bg_color = Color(0.956863, 0.870588, 0.65098, 1)
+border_width_left = 8
+border_width_top = 8
+border_width_right = 8
+border_width_bottom = 8
+border_color = Color(0.654902, 0.427451, 0.192157, 1)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
+
+[node name="BossDialogueBox" type="CanvasLayer"]
+script = ExtResource("1_dialogue_script")
+layer = 50
+
+[node name="Overlay" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.0)
+
+[node name="Root" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="DialoguePanel" type="PanelContainer" parent="Root"]
+visible = false
+anchors_preset = 0
+anchor_left = 0.15
+anchor_top = 0.76
+anchor_right = 0.86
+anchor_bottom = 0.96
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_dialogue_panel")
+
+[node name="ContentMargin" type="MarginContainer" parent="Root/DialoguePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 54
+theme_override_constants/margin_bottom = 28
+
+[node name="BodyLabel" type="Label" parent="Root/DialoguePanel/ContentMargin"]
+custom_minimum_size = Vector2(0, 126)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.211765, 0.133333, 0.0588235, 1)
+theme_override_font_sizes/font_size = 24
+autowrap_mode = 3
+text = "Dialogue line"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AdvanceBox" type="HBoxContainer" parent="Root/DialoguePanel"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -110.0
+offset_top = -40.0
+offset_right = -28.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
+alignment = 2
+
+[node name="PromptLabel" type="Label" parent="Root/DialoguePanel/AdvanceBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.423529, 0.262745, 0.113725, 1)
+theme_override_font_sizes/font_size = 18
+text = "Q"
+vertical_alignment = 1
+
+[node name="NextButton" type="Button" parent="Root/DialoguePanel/AdvanceBox"]
+custom_minimum_size = Vector2(30, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.211765, 0.133333, 0.0588235, 1)
+theme_override_font_sizes/font_size = 18
+flat = true
+text = "v"
+
+[node name="NamePlate" type="PanelContainer" parent="Root"]
+visible = false
+anchors_preset = 0
+anchor_left = 0.17
+anchor_top = 0.705
+anchor_right = 0.36
+anchor_bottom = 0.775
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_nameplate")
+
+[node name="NameLabel" type="Label" parent="Root/NamePlate"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 22.0
+offset_top = 8.0
+offset_right = -22.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.211765, 0.133333, 0.0588235, 1)
+theme_override_font_sizes/font_size = 21
+text = "Speaker"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PortraitFrame" type="PanelContainer" parent="Root"]
+visible = false
+anchors_preset = 0
+anchor_left = 0.63
+anchor_top = 0.36
+anchor_right = 0.84
+anchor_bottom = 0.78
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait_frame")
+
+[node name="PortraitMargin" type="MarginContainer" parent="Root/PortraitFrame"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="Portrait" type="ColorRect" parent="Root/PortraitFrame/PortraitMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.74902, 0.678431, 0.890196, 1)
+
+[node name="PortraitGlow" type="ColorRect" parent="Root/PortraitFrame/PortraitMargin/Portrait"]
+anchors_preset = 8
+anchor_left = 0.22
+anchor_top = 0.06
+anchor_right = 0.78
+anchor_bottom = 0.42
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.12)
+
+[node name="PortraitBust" type="ColorRect" parent="Root/PortraitFrame/PortraitMargin/Portrait"]
+anchors_preset = 8
+anchor_left = 0.18
+anchor_top = 0.12
+anchor_right = 0.82
+anchor_bottom = 0.9
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.18)

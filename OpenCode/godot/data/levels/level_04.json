@@ -1,0 +1,181 @@
+{
+  "id": "level_04",
+  "level_number": 4,
+  "title": "Functions",
+  "concept_summary": "package logic into reusable functions",
+  "intro_message": "Level 4: enter the codex archive, clear the routine sentries, then reach the function gate.",
+  "encounter_remaining_message": "Routine sentries still guard the codex archive.",
+  "exit_unlocked_message": "Function gate opened. Follow the cleared codex route upward.",
+  "level_complete_message": "Level 4 clear. Function logic stabilized.",
+  "encounter_cancelled_message": "Encounter cancelled.",
+  "respawn_message": "Respawn complete.",
+  "defeat_message": "Knight integrity lost. Respawning...",
+  "boss_intro_message": "Boss chamber reached. Unseal the routines and defeat the Archivist.",
+  "boss_defeated_message": "Archivist released the codex and fell silent.",
+  "player_damage_on_failure": 26,
+  "enemy_count_min": 16,
+  "enemy_count_max": 20,
+  "enemy_archetypes": [
+    {
+      "level_theme": "functions",
+      "difficulty": "normal",
+      "attack_style": "melee",
+      "color": [0.733333, 0.360784, 0.34902, 1.0],
+      "patrol_distance": 62,
+      "patrol_speed": 82,
+      "chase_speed": 118,
+      "vision_range": 350,
+      "aggro_range": 350,
+      "melee_range": 74,
+      "ranged_range": 0,
+      "vertical_tolerance": 182,
+      "vision_enter_range_multiplier": 1.0,
+      "vision_exit_range_multiplier": 1.14,
+      "vision_enter_vertical_multiplier": 1.0,
+      "vision_exit_vertical_multiplier": 1.16,
+      "attack_interval": 0.98,
+      "melee_damage": 14,
+      "ranged_damage": 0,
+      "projectile_speed": 0
+    },
+    {
+      "level_theme": "functions",
+      "difficulty": "hard",
+      "attack_style": "ranged",
+      "color": [0.611765, 0.447059, 0.278431, 1.0],
+      "patrol_distance": 76,
+      "patrol_speed": 74,
+      "chase_speed": 96,
+      "vision_range": 490,
+      "aggro_range": 490,
+      "melee_range": 42,
+      "ranged_attack_range": 440,
+      "ranged_range": 330,
+      "vertical_tolerance": 262,
+      "vision_enter_range_multiplier": 1.0,
+      "vision_exit_range_multiplier": 1.24,
+      "vision_enter_vertical_multiplier": 1.0,
+      "vision_exit_vertical_multiplier": 1.28,
+      "attack_interval": 1.28,
+      "melee_damage": 8,
+      "ranged_damage": 12,
+      "projectile_speed": 372
+    }
+  ],
+  "generation": {
+    "room_count_min": 14,
+    "room_count_max": 16,
+    "min_critical_path_rooms": 7,
+    "columns": 4,
+    "rows": 5,
+    "room_width": 520,
+    "room_height": 320,
+    "spacing_x": 1480,
+    "spacing_y": 620,
+    "origin_x": 380,
+    "origin_y": 780
+  },
+  "adaptive_defaults": {
+    "combat": "normal",
+    "chest": "normal",
+    "altar": "normal",
+    "boss": "hard"
+  },
+  "chests": [
+    {
+      "node_name": "ChestA",
+      "level_theme": "functions",
+      "reward_text": "Chest reward: +1 routine shard recovered."
+    },
+    {
+      "node_name": "ChestB",
+      "level_theme": "functions",
+      "reward_text": "Chest reward: +1 codex sigil recovered."
+    }
+  ],
+  "altars": [
+    {
+      "node_name": "AltarA",
+      "level_theme": "functions"
+    }
+  ],
+  "exit": {
+    "locked_text": "Locked",
+    "ready_text": "Exit"
+  },
+  "boss": {
+    "boss_name": "Archivist",
+    "boss_brief": "A codex keeper who hides power inside sealed routines.",
+    "mechanic_summary": "Structure reusable responses to named attack patterns.",
+    "mechanic_type": "archivist",
+    "level_theme": "functions",
+    "difficulty": "hard",
+	"position": [1440, 909],
+    "arena_spawn": [280, 960],
+    "max_health": 470,
+    "color": [0.611765, 0.45098, 0.215686, 1.0],
+    "move_speed": 262,
+    "jump_force": -515,
+    "gravity": 1210,
+    "jump_interval": 0.72,
+    "attack_interval": 0.74,
+    "reposition_interval": 0.8,
+    "melee_range": 96,
+    "ranged_range": 490,
+    "vertical_tolerance": 320,
+    "melee_damage": 24,
+    "ranged_damage": 20,
+    "projectile_speed": 462,
+    "strategy_attack_budget": 5,
+    "max_overdrive_level": 4,
+    "overdrive_tick_interval": 2.7,
+    "overdrive_move_multiplier": 1.15,
+    "overdrive_damage_multiplier": 1.19,
+    "overdrive_attack_speed_multiplier": 0.88,
+    "arena_left": 96,
+    "arena_right": 1824,
+    "anchor_points": [200, 420, 650, 900, 1160, 1440, 1730],
+    "arena_layout": {
+      "mist_top": 110,
+      "mist_bottom": 900,
+      "mist_alpha": 0.12,
+      "platforms": [
+        {"x": 300, "y": 850, "width": 250},
+        {"x": 680, "y": 640, "width": 230},
+        {"x": 960, "y": 500, "width": 320},
+        {"x": 1240, "y": 640, "width": 230},
+        {"x": 1620, "y": 850, "width": 250}
+      ]
+    },
+    "environment": {
+      "backdrop_color": [0.133333, 0.109804, 0.0823529, 1.0],
+      "mist_color": [0.529412, 0.392157, 0.152941, 0.11],
+      "floor_color": [0.286275, 0.231373, 0.160784, 1.0],
+      "ceiling_color": [0.286275, 0.231373, 0.160784, 1.0],
+      "wall_color": [0.192157, 0.14902, 0.105882, 1.0],
+      "platform_color": [0.423529, 0.333333, 0.223529, 1.0]
+    },
+    "terminal": {
+      "title": "Boss Terminal: Functions",
+      "intro_status_text": "Organize your responses into reusable combat routines.",
+      "reprogram_status_text": "Refactor your tactic before the Archivist changes the call order.",
+      "success_text": "Function set accepted.",
+      "failure_text": "The Archivist seals your broken routine."
+    },
+    "feedback": {
+      "start_battle": "Archivist opens the codex and begins calling sealed routines.",
+      "reposition": "Archivist relocates to a new script lane.",
+      "melee_attack": "Archivist carves through you for %d damage.",
+      "ranged_attack": "Archivist casts a codex burst.",
+      "projectile_hit": "Codex burst strikes for %d damage."
+    },
+    "dialogue": {
+      "intro_boss": "Archivist: True power belongs hidden inside proper form.",
+      "intro_player": "Skill Issue: It becomes useful when it can be called again.",
+      "rewrite_boss": "Archivist: Your routines are brittle. Mine are canon.",
+      "rewrite_player": "Skill Issue: Canon still breaks when the function is wrong.",
+      "defeat_boss": "Archivist: Function executed... archive unsealed.",
+      "defeat_player": "Skill Issue: Then let the codex be used."
+    }
+  }
+}

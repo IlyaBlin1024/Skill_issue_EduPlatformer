@@ -1,0 +1,340 @@
+[gd_scene format=3 uid="uid://bossroomscene"]
+
+[ext_resource type="PackedScene" uid="uid://playerscene" path="res://scenes/player.tscn" id="1_player"]
+[ext_resource type="Script" uid="uid://btmt2yxakxpw" path="res://scripts/boss_room.gd" id="2_room"]
+[ext_resource type="PackedScene" uid="uid://bgp0gm3hraadj" path="res://scenes/ui/combat_terminal.tscn" id="3_terminal"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="4_hud"]
+[ext_resource type="Script" uid="uid://c45jy1m45eh2n" path="res://scripts/boss_encounter.gd" id="5_boss"]
+[ext_resource type="PackedScene" path="res://scenes/ui/boss_dialogue_box.tscn" id="6_dialogue"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(1920, 96)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(48, 1080)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform_large"]
+size = Vector2(260, 28)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform_medium"]
+size = Vector2(200, 28)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_boss"]
+size = Vector2(96, 150)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dialogue_panel"]
+bg_color = Color(0.960784, 0.878431, 0.603922, 0.98)
+border_width_left = 8
+border_width_top = 8
+border_width_right = 8
+border_width_bottom = 8
+border_color = Color(0.611765, 0.392157, 0.180392, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0.243137, 0.152941, 0.0666667, 0.25)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nameplate"]
+bg_color = Color(0.968627, 0.807843, 0.47451, 1)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0.611765, 0.392157, 0.180392, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_portrait_frame"]
+bg_color = Color(0.94902, 0.85098, 0.623529, 1)
+border_width_left = 8
+border_width_top = 8
+border_width_right = 8
+border_width_bottom = 8
+border_color = Color(0.611765, 0.392157, 0.180392, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+
+[node name="BossRoom" type="Node2D" unique_id=2136481755]
+script = ExtResource("2_room")
+
+[node name="Backdrop" type="ColorRect" parent="." unique_id=1266773124]
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0.160784, 0.152941, 0.223529, 1)
+
+[node name="MistBand" type="ColorRect" parent="." unique_id=1592067188]
+offset_top = 138.0
+offset_right = 1920.0
+offset_bottom = 930.0
+color = Color(0.290196, 0.219608, 0.372549, 0.14)
+
+[node name="Floor" type="StaticBody2D" parent="." unique_id=1698322250]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor" unique_id=1673636518]
+position = Vector2(960, 1032)
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="Visual" type="ColorRect" parent="Floor" unique_id=983289269]
+offset_top = 984.0
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0.262745, 0.211765, 0.337255, 1)
+
+[node name="LeftWall" type="StaticBody2D" parent="." unique_id=1782174127]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall" unique_id=370683816]
+position = Vector2(24, 540)
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Visual" type="ColorRect" parent="LeftWall" unique_id=1700634606]
+offset_right = 48.0
+offset_bottom = 1080.0
+color = Color(0.196078, 0.156863, 0.247059, 1)
+
+[node name="RightWall" type="StaticBody2D" parent="." unique_id=1606067344]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall" unique_id=279387262]
+position = Vector2(1896, 540)
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Visual" type="ColorRect" parent="RightWall" unique_id=1069689941]
+offset_left = 1872.0
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0.196078, 0.156863, 0.247059, 1)
+
+[node name="Ceiling" type="StaticBody2D" parent="." unique_id=1627840678]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ceiling" unique_id=800335462]
+position = Vector2(960, 48)
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="Visual" type="ColorRect" parent="Ceiling" unique_id=1370128567]
+offset_right = 1920.0
+offset_bottom = 96.0
+color = Color(0.262745, 0.211765, 0.337255, 1)
+
+[node name="PlatformA" type="StaticBody2D" parent="." unique_id=1928935362]
+collision_layer = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlatformA" unique_id=968177161]
+position = Vector2(332, 846)
+shape = SubResource("RectangleShape2D_platform_large")
+one_way_collision = true
+one_way_collision_margin = 2.0
+
+[node name="Visual" type="ColorRect" parent="PlatformA" unique_id=1076021429]
+offset_left = 202.0
+offset_top = 832.0
+offset_right = 462.0
+offset_bottom = 860.0
+color = Color(0.345098, 0.27451, 0.415686, 1)
+
+[node name="PlatformB" type="StaticBody2D" parent="." unique_id=1552245535]
+collision_layer = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlatformB" unique_id=1756144913]
+position = Vector2(692, 706)
+shape = SubResource("RectangleShape2D_platform_medium")
+one_way_collision = true
+one_way_collision_margin = 2.0
+
+[node name="Visual" type="ColorRect" parent="PlatformB" unique_id=63829839]
+offset_left = 592.0
+offset_top = 692.0
+offset_right = 792.0
+offset_bottom = 720.0
+color = Color(0.345098, 0.27451, 0.415686, 1)
+
+[node name="PlatformC" type="StaticBody2D" parent="." unique_id=1790609101]
+collision_layer = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlatformC" unique_id=232466628]
+position = Vector2(1046, 580)
+shape = SubResource("RectangleShape2D_platform_large")
+one_way_collision = true
+one_way_collision_margin = 2.0
+
+[node name="Visual" type="ColorRect" parent="PlatformC" unique_id=1291278119]
+offset_left = 916.0
+offset_top = 566.0
+offset_right = 1176.0
+offset_bottom = 594.0
+color = Color(0.345098, 0.27451, 0.415686, 1)
+
+[node name="PlatformD" type="StaticBody2D" parent="." unique_id=663773997]
+collision_layer = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlatformD" unique_id=1689303381]
+position = Vector2(1458, 728)
+shape = SubResource("RectangleShape2D_platform_medium")
+one_way_collision = true
+one_way_collision_margin = 2.0
+
+[node name="Visual" type="ColorRect" parent="PlatformD" unique_id=680145172]
+offset_left = 1358.0
+offset_top = 714.0
+offset_right = 1558.0
+offset_bottom = 742.0
+color = Color(0.345098, 0.27451, 0.415686, 1)
+
+[node name="PlatformE" type="StaticBody2D" parent="." unique_id=1381520774]
+collision_layer = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlatformE" unique_id=154105207]
+position = Vector2(1704, 512)
+shape = SubResource("RectangleShape2D_platform_medium")
+one_way_collision = true
+one_way_collision_margin = 2.0
+
+[node name="Visual" type="ColorRect" parent="PlatformE" unique_id=896040151]
+offset_left = 1604.0
+offset_top = 498.0
+offset_right = 1804.0
+offset_bottom = 526.0
+color = Color(0.345098, 0.27451, 0.415686, 1)
+
+[node name="BossEncounter" type="CharacterBody2D" parent="." unique_id=331093335]
+position = Vector2(1440, 929)
+script = ExtResource("5_boss")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossEncounter" unique_id=1144222859]
+shape = SubResource("RectangleShape2D_boss")
+disabled = true
+
+[node name="Visual" type="ColorRect" parent="BossEncounter" unique_id=435256541]
+offset_left = -38.0
+offset_top = -75.0
+offset_right = 38.0
+offset_bottom = 75.0
+color = Color(0.607843, 0.270588, 0.682353, 1)
+
+[node name="NameLabel" type="Label" parent="BossEncounter" unique_id=954396964]
+offset_left = -78.0
+offset_top = -132.0
+offset_right = 80.0
+offset_bottom = -104.0
+text = "Threshold Warden"
+horizontal_alignment = 1
+
+[node name="HpLabel" type="Label" parent="BossEncounter" unique_id=1857855275]
+offset_left = -54.0
+offset_top = -110.0
+offset_right = 56.0
+offset_bottom = -84.0
+text = "Boss HP 320"
+horizontal_alignment = 1
+
+[node name="Player" parent="." unique_id=1430263803 instance=ExtResource("1_player")]
+position = Vector2(280, 960)
+
+[node name="CombatTerminal" parent="." unique_id=1629830895 instance=ExtResource("3_terminal")]
+
+[node name="Hud" parent="." unique_id=1588490113 instance=ExtResource("4_hud")]
+
+[node name="BossDialogueBox" parent="." unique_id=121699055 instance=ExtResource("6_dialogue")]
+
+[node name="CutsceneCamera" type="Camera2D" parent="." unique_id=450013271]
+position = Vector2(960, 540)
+enabled = false
+limit_left = 0
+limit_top = 0
+limit_right = 1920
+limit_bottom = 1080
+
+[node name="DialogueLayer" type="CanvasLayer" parent="." unique_id=1468539121]
+layer = 20
+
+[node name="Panel" type="PanelContainer" parent="DialogueLayer" unique_id=991704661]
+visible = false
+anchors_preset = -1
+anchor_left = 0.05
+anchor_top = 0.69
+anchor_right = 0.95
+anchor_bottom = 0.97
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dialogue_panel")
+
+[node name="Margin" type="MarginContainer" parent="DialogueLayer/Panel" unique_id=140037599]
+layout_mode = 2
+theme_override_constants/margin_left = 38
+theme_override_constants/margin_top = 56
+theme_override_constants/margin_right = 270
+theme_override_constants/margin_bottom = 34
+
+[node name="VBox" type="VBoxContainer" parent="DialogueLayer/Panel/Margin" unique_id=515124530]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="BodyLabel" type="Label" parent="DialogueLayer/Panel/Margin/VBox" unique_id=2083140863]
+custom_minimum_size = Vector2(0, 160)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.219608, 0.141176, 0.0627451, 1)
+theme_override_colors/font_shadow_color = Color(1, 1, 1, 0)
+theme_override_font_sizes/font_size = 24
+text = "Dialogue line"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Actions" type="HBoxContainer" parent="DialogueLayer/Panel/Margin/VBox" unique_id=521070483]
+layout_mode = 2
+alignment = 2
+
+[node name="PromptLabel" type="Label" parent="DialogueLayer/Panel/Margin/VBox/Actions" unique_id=1967792850]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.360784, 0.227451, 0.0980392, 1)
+text = "Q / Next"
+vertical_alignment = 1
+
+[node name="NextButton" type="Button" parent="DialogueLayer/Panel/Margin/VBox/Actions" unique_id=1673026164]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.219608, 0.141176, 0.0627451, 1)
+text = "Next"
+
+[node name="NamePlate" type="PanelContainer" parent="DialogueLayer/Panel" unique_id=1935055807]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_nameplate")
+
+[node name="NameLabel" type="Label" parent="DialogueLayer/Panel/NamePlate" unique_id=1617563388]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.219608, 0.141176, 0.0627451, 1)
+text = "Speaker"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PortraitFrame" type="PanelContainer" parent="DialogueLayer/Panel" unique_id=2080959064]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait_frame")
+
+[node name="PortraitMargin" type="MarginContainer" parent="DialogueLayer/Panel/PortraitFrame" unique_id=703460004]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Portrait" type="ColorRect" parent="DialogueLayer/Panel/PortraitFrame/PortraitMargin" unique_id=488607177]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.701961, 0.768627, 0.980392, 1)
+
+[node name="FadeLayer" type="CanvasLayer" parent="." unique_id=877001143]
+layer = 90
+
+[node name="FadeRect" type="ColorRect" parent="FadeLayer" unique_id=455293917]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
