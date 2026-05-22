@@ -25,12 +25,21 @@ This repository currently contains a Sprint 1 scaffold:
 
 ## Run Backend
 
-```bash
+1. Optional: create a local environment file for backend model/URL overrides:
+
+```powershell
 cd backend
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+copy .env.example .env
+```
+
+2. Keep `backend/.env` local only. It is ignored by Git.
+   Hugging Face API keys are entered in the game Settings screen, not in open-source files.
+
+3. Start the backend:
+
+```powershell
+cd backend
+.\run_backend.bat
 ```
 
 The default API URL expected by the Godot client is `http://127.0.0.1:8000`.

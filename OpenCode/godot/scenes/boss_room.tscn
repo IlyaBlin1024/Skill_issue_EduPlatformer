@@ -84,7 +84,7 @@ shape = SubResource("RectangleShape2D_floor")
 offset_top = 984.0
 offset_right = 1920.0
 offset_bottom = 1080.0
-color = Color(0.262745, 0.211765, 0.337255, 1)
+color = Color(0.262745, 0.211765, 0.337255, 0)
 
 [node name="LeftWall" type="StaticBody2D" parent="." unique_id=1782174127]
 
@@ -95,7 +95,7 @@ shape = SubResource("RectangleShape2D_wall")
 [node name="Visual" type="ColorRect" parent="LeftWall" unique_id=1700634606]
 offset_right = 48.0
 offset_bottom = 1080.0
-color = Color(0.196078, 0.156863, 0.247059, 1)
+color = Color(0.196078, 0.156863, 0.247059, 0)
 
 [node name="RightWall" type="StaticBody2D" parent="." unique_id=1606067344]
 
@@ -107,7 +107,7 @@ shape = SubResource("RectangleShape2D_wall")
 offset_left = 1872.0
 offset_right = 1920.0
 offset_bottom = 1080.0
-color = Color(0.196078, 0.156863, 0.247059, 1)
+color = Color(0.196078, 0.156863, 0.247059, 0)
 
 [node name="Ceiling" type="StaticBody2D" parent="." unique_id=1627840678]
 
@@ -118,7 +118,7 @@ shape = SubResource("RectangleShape2D_floor")
 [node name="Visual" type="ColorRect" parent="Ceiling" unique_id=1370128567]
 offset_right = 1920.0
 offset_bottom = 96.0
-color = Color(0.262745, 0.211765, 0.337255, 1)
+color = Color(0.262745, 0.211765, 0.337255, 0)
 
 [node name="PlatformA" type="StaticBody2D" parent="." unique_id=1928935362]
 collision_layer = 2
@@ -127,14 +127,14 @@ collision_layer = 2
 position = Vector2(332, 846)
 shape = SubResource("RectangleShape2D_platform_large")
 one_way_collision = true
-one_way_collision_margin = 2.0
+one_way_collision_margin = 0.0
 
 [node name="Visual" type="ColorRect" parent="PlatformA" unique_id=1076021429]
 offset_left = 202.0
 offset_top = 832.0
 offset_right = 462.0
 offset_bottom = 860.0
-color = Color(0.345098, 0.27451, 0.415686, 1)
+color = Color(0.345098, 0.27451, 0.415686, 0)
 
 [node name="PlatformB" type="StaticBody2D" parent="." unique_id=1552245535]
 collision_layer = 2
@@ -143,14 +143,14 @@ collision_layer = 2
 position = Vector2(692, 706)
 shape = SubResource("RectangleShape2D_platform_medium")
 one_way_collision = true
-one_way_collision_margin = 2.0
+one_way_collision_margin = 0.0
 
 [node name="Visual" type="ColorRect" parent="PlatformB" unique_id=63829839]
 offset_left = 592.0
 offset_top = 692.0
 offset_right = 792.0
 offset_bottom = 720.0
-color = Color(0.345098, 0.27451, 0.415686, 1)
+color = Color(0.345098, 0.27451, 0.415686, 0)
 
 [node name="PlatformC" type="StaticBody2D" parent="." unique_id=1790609101]
 collision_layer = 2
@@ -159,14 +159,14 @@ collision_layer = 2
 position = Vector2(1046, 580)
 shape = SubResource("RectangleShape2D_platform_large")
 one_way_collision = true
-one_way_collision_margin = 2.0
+one_way_collision_margin = 0.0
 
 [node name="Visual" type="ColorRect" parent="PlatformC" unique_id=1291278119]
 offset_left = 916.0
 offset_top = 566.0
 offset_right = 1176.0
 offset_bottom = 594.0
-color = Color(0.345098, 0.27451, 0.415686, 1)
+color = Color(0.345098, 0.27451, 0.415686, 0)
 
 [node name="PlatformD" type="StaticBody2D" parent="." unique_id=663773997]
 collision_layer = 2
@@ -175,14 +175,14 @@ collision_layer = 2
 position = Vector2(1458, 728)
 shape = SubResource("RectangleShape2D_platform_medium")
 one_way_collision = true
-one_way_collision_margin = 2.0
+one_way_collision_margin = 0.0
 
 [node name="Visual" type="ColorRect" parent="PlatformD" unique_id=680145172]
 offset_left = 1358.0
 offset_top = 714.0
 offset_right = 1558.0
 offset_bottom = 742.0
-color = Color(0.345098, 0.27451, 0.415686, 1)
+color = Color(0.345098, 0.27451, 0.415686, 0)
 
 [node name="PlatformE" type="StaticBody2D" parent="." unique_id=1381520774]
 collision_layer = 2
@@ -191,14 +191,14 @@ collision_layer = 2
 position = Vector2(1704, 512)
 shape = SubResource("RectangleShape2D_platform_medium")
 one_way_collision = true
-one_way_collision_margin = 2.0
+one_way_collision_margin = 0.0
 
 [node name="Visual" type="ColorRect" parent="PlatformE" unique_id=896040151]
 offset_left = 1604.0
 offset_top = 498.0
 offset_right = 1804.0
 offset_bottom = 526.0
-color = Color(0.345098, 0.27451, 0.415686, 1)
+color = Color(0.345098, 0.27451, 0.415686, 0)
 
 [node name="BossEncounter" type="CharacterBody2D" parent="." unique_id=331093335]
 position = Vector2(1440, 929)
@@ -209,11 +209,12 @@ shape = SubResource("RectangleShape2D_boss")
 disabled = true
 
 [node name="Visual" type="ColorRect" parent="BossEncounter" unique_id=435256541]
+visible = false
 offset_left = -38.0
 offset_top = -75.0
 offset_right = 38.0
 offset_bottom = 75.0
-color = Color(0.607843, 0.270588, 0.682353, 1)
+color = Color(0.607843, 0.270588, 0.682353, 0)
 
 [node name="NameLabel" type="Label" parent="BossEncounter" unique_id=954396964]
 offset_left = -78.0

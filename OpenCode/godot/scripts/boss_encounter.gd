@@ -2,8 +2,64 @@ extends CharacterBody2D
 class_name BossEncounter
 
 const PROJECTILE_SCRIPT := preload("res://scripts/enemy_projectile.gd")
+const PRODUCTION_ANIMATION_LOADER := preload("res://scripts/production_animation_loader.gd")
 const SOLID_GEOMETRY_LAYER := 1
 const ONE_WAY_GEOMETRY_LAYER := 2
+const BOSS_SPRITE_CANVAS_SIZE := Vector2i(256, 256)
+const BOSS_SPRITE_TARGET_HEIGHT := 154
+const BOSS_SPRITE_MAX_WIDTH := 220
+const BOSS_SPRITE_FOOT_MARGIN := 6
+const BOSS_SPRITE_FOLDERS := {
+	"threshold_warden": "01_threshold_warden",
+	"logic_spider": "02_logic_spider",
+	"assembly_golem": "03_assembly_golem",
+	"archivist": "04_archivist",
+	"system_admin": "05_system_admin",
+}
+const BOSS_SPRITE_ANIMATIONS := {
+	"threshold_warden": {
+		"idle": {"prefix": "idle", "fps": 6.0, "loop": true},
+		"move": {"prefix": "move", "fps": 10.0, "loop": true},
+		"telegraph": {"prefix": "telegraph", "fps": 10.0, "loop": false},
+		"attack": {"prefix": "attack_threshold", "fps": 12.0, "loop": false},
+		"hurt": {"prefix": "hurt", "fps": 10.0, "loop": false},
+		"death": {"prefix": "death", "fps": 8.0, "loop": false},
+	},
+	"logic_spider": {
+		"idle": {"prefix": "idle", "fps": 6.0, "loop": true},
+		"move": {"prefix": "crawl", "fps": 10.0, "loop": true},
+		"telegraph": {"prefix": "telegraph_branch", "fps": 10.0, "loop": false},
+		"attack": {"prefix": "attack_branch", "fps": 12.0, "loop": false},
+		"hurt": {"prefix": "hurt", "fps": 10.0, "loop": false},
+		"death": {"prefix": "death", "fps": 8.0, "loop": false},
+	},
+	"assembly_golem": {
+		"idle": {"prefix": "idle", "fps": 6.0, "loop": true},
+		"move": {"prefix": "walk", "fps": 10.0, "loop": true},
+		"telegraph": {"prefix": "telegraph_loop", "fps": 10.0, "loop": false},
+		"attack": {"prefix": "attack_loop", "fps": 12.0, "loop": false},
+		"hurt": {"prefix": "hurt", "fps": 10.0, "loop": false},
+		"death": {"prefix": "death", "fps": 8.0, "loop": false},
+	},
+	"archivist": {
+		"idle": {"prefix": "idle", "fps": 6.0, "loop": true},
+		"move": {"prefix": "float", "fps": 8.0, "loop": true},
+		"telegraph": {"prefix": "telegraph_function", "fps": 10.0, "loop": false},
+		"attack": {"prefix": "attack_function", "fps": 12.0, "loop": false},
+		"hurt": {"prefix": "hurt", "fps": 10.0, "loop": false},
+		"death": {"prefix": "death", "fps": 8.0, "loop": false},
+	},
+	"system_admin": {
+		"idle": {"prefix": "player_idle", "fps": 6.0, "loop": true},
+		"move": {"prefix": "player_run", "fps": 10.0, "loop": true},
+		"telegraph": {"prefix": "player_melee_combo_01", "fps": 10.0, "loop": false},
+		"attack": {"prefix": "player_ranged_combo_03", "fps": 12.0, "loop": false},
+		"teleport_dissolve": {"prefix": "player_death", "fps": 12.0, "loop": false},
+		"teleport_materialize": {"prefix": "player_land", "fps": 12.0, "loop": false},
+		"hurt": {"prefix": "player_hurt", "fps": 10.0, "loop": false},
+		"death": {"prefix": "player_death", "fps": 8.0, "loop": false},
+	},
+}
 
 signal boss_defeated
 signal boss_feedback(message: String)
@@ -126,6 +182,11 @@ var _teleport_after_attack_vector := Vector2.ZERO
 var _teleport_indicator_root: Node2D = null
 var _teleport_indicator_glow: Polygon2D = null
 var _teleport_indicator_core: Polygon2D = null
+var _sprite: AnimatedSprite2D = null
+var _sprites_ready := false
+var _sprite_boss_key := ""
+var _sprite_base_position := Vector2.ZERO
+var _current_visual_animation := ""
 
 
 func _ready() -> void:
@@ -135,6 +196,7 @@ func _ready() -> void:
 	_visual_base_position = visual.position
 	_visual_base_scale = visual.scale
 	_visual_base_rotation = visual.rotation
+	_setup_boss_sprite()
 	_ensure_teleport_indicator()
 	_reset_state()
 	_deactivate_visuals()
@@ -149,11 +211,13 @@ func _physics_process(delta: float) -> void:
 	if not _combat_enabled:
 		velocity = Vector2.ZERO
 		apply_floor_snap()
+		_play_boss_visual("idle")
 		move_and_slide()
 		return
 	if _terminal_paused:
 		velocity = Vector2.ZERO
 		apply_floor_snap()
+		_play_boss_visual("idle")
 		move_and_slide()
 		return
 
@@ -203,6 +267,7 @@ func _physics_process(delta: float) -> void:
 			velocity.x = move_toward(velocity.x, 0.0, _move_speed * delta * 4.0)
 		else:
 			velocity.x = anchor_direction * _move_speed
+			_play_boss_visual("move")
 
 		if is_on_floor() and _jump_timer <= 0.0 and absf(to_anchor_x) > 18.0:
 			velocity.y = _jump_force
@@ -212,6 +277,7 @@ func _physics_process(delta: float) -> void:
 		_attempt_pattern_attack()
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, _move_speed * delta * 2.0)
+		_play_boss_visual("idle")
 
 	move_and_slide()
 	global_position.x = clampf(global_position.x, _arena_left, _arena_right)
@@ -294,6 +360,7 @@ func configure(config: Dictionary) -> void:
 		if parsed_anchors.size() >= 2:
 			_anchor_points = parsed_anchors
 	_capture_base_stats()
+	_setup_boss_sprite()
 	_reset_state()
 	_deactivate_visuals()
 
@@ -314,6 +381,7 @@ func activate_boss() -> void:
 	collision_shape.disabled = false
 	_hide_teleport_indicator()
 	_update_hp_label()
+	_play_boss_visual("idle")
 
 
 func start_battle() -> void:
@@ -328,6 +396,7 @@ func start_battle() -> void:
 	_system_phase_timer = _system_phase_interval
 	_logic_branch_timer = _logic_branch_interval
 	_play_battle_entry_animation()
+	_play_boss_visual("move")
 	boss_feedback.emit(_start_feedback)
 
 
@@ -345,6 +414,7 @@ func pause_for_terminal() -> void:
 	_clear_projectiles()
 	_hide_teleport_indicator()
 	_reset_visual_pose()
+	_play_boss_visual("idle")
 
 
 func resume_after_terminal(should_resume_combat: bool) -> void:
@@ -356,6 +426,7 @@ func resume_after_terminal(should_resume_combat: bool) -> void:
 	velocity = Vector2.ZERO
 	_hide_teleport_indicator()
 	_reset_visual_pose()
+	_play_boss_visual("idle" if not should_resume_combat else "move")
 
 
 func build_terminal_payload(is_reprogramming: bool) -> Dictionary:
@@ -400,6 +471,7 @@ func apply_combat_result(result: Dictionary) -> bool:
 		_hide_teleport_indicator()
 		collision_shape.disabled = true
 		_reset_visual_pose()
+		_play_boss_visual("death")
 		visible = false
 		boss_defeated.emit()
 		return true
@@ -803,6 +875,7 @@ func _apply_parry_stagger() -> void:
 	_attack_cooldown = _parry_stagger_duration + 0.32
 	velocity = Vector2.ZERO
 	apply_combat_result({"damage": _parry_damage})
+	GameState.log_event("boss_damage_dealt", {"amount": _parry_damage, "mode": "parry", "boss_name": boss_name})
 	_play_parry_stagger_animation()
 	boss_feedback.emit("%s is parried and staggered." % boss_name)
 
@@ -817,6 +890,7 @@ func _begin_teleport(target_x: float, followup_attack_kind: String = "", followu
 	_teleport_after_attack_vector = followup_vector
 	velocity = Vector2.ZERO
 	_show_teleport_indicator(_teleport_target_x)
+	_play_boss_visual("teleport_dissolve")
 
 
 func _update_teleport_state(delta: float) -> bool:
@@ -832,6 +906,7 @@ func _update_teleport_state(delta: float) -> bool:
 			apply_floor_snap()
 			_teleport_phase = "materialize"
 			_teleport_timer = 0.18
+			_play_boss_visual("teleport_materialize")
 		return true
 	var materialize_ratio := 1.0 - (_teleport_timer / 0.18 if 0.18 > 0.0 else 1.0)
 	_apply_teleport_visuals(materialize_ratio, true)
@@ -856,8 +931,12 @@ func _apply_teleport_visuals(progress: float, materializing: bool) -> void:
 	var alpha := clamped_progress if materializing else 1.0 - clamped_progress
 	var scale_x := lerpf(1.0, 0.68, 1.0 - alpha)
 	var scale_y := lerpf(1.0, 1.2, 1.0 - alpha)
-	visual.scale = Vector2(scale_x, scale_y)
-	visual.modulate = Color(1.0, 1.0, 1.0, alpha)
+	if _sprites_ready and _sprite != null:
+		_sprite.scale = Vector2(scale_x, scale_y)
+		_sprite.modulate = Color(1.0, 1.0, 1.0, alpha)
+	else:
+		visual.scale = Vector2(scale_x, scale_y)
+		visual.modulate = Color(1.0, 1.0, 1.0, alpha)
 
 
 func _ensure_teleport_indicator() -> void:
@@ -1087,6 +1166,7 @@ func _clear_projectiles() -> void:
 
 
 func _flash_on_hit() -> void:
+	_play_boss_visual("hurt")
 	if _animation_tween != null and _animation_tween.is_running():
 		_animation_tween.kill()
 	visual.color = Color(1, 0.8, 0.45, 1)
@@ -1135,6 +1215,15 @@ func get_dialogue_line(key: String) -> String:
 	return String(_dialogue.get(key, ""))
 
 
+func get_dialogue_texture() -> Texture2D:
+	if not _sprites_ready or _sprite == null or _sprite.sprite_frames == null:
+		return null
+	for animation_name in ["idle", "move", "attack", "hurt"]:
+		if _sprite.sprite_frames.has_animation(animation_name) and _sprite.sprite_frames.get_frame_count(animation_name) > 0:
+			return _sprite.sprite_frames.get_frame_texture(animation_name, 0)
+	return null
+
+
 func _capture_base_stats() -> void:
 	_base_move_speed = _move_speed
 	_base_jump_interval = _jump_interval
@@ -1171,6 +1260,8 @@ func _raise_overdrive() -> void:
 
 
 func _play_attack_telegraph_animation(kind: String, to_player: Vector2) -> void:
+	if _play_boss_visual("telegraph"):
+		return
 	if _animation_tween != null and _animation_tween.is_running():
 		_animation_tween.kill()
 	_reset_visual_pose()
@@ -1188,6 +1279,8 @@ func _play_attack_telegraph_animation(kind: String, to_player: Vector2) -> void:
 
 
 func _play_parry_stagger_animation() -> void:
+	if _play_boss_visual("hurt"):
+		return
 	if _animation_tween != null and _animation_tween.is_running():
 		_animation_tween.kill()
 	_reset_visual_pose()
@@ -1206,6 +1299,8 @@ func _play_parry_stagger_animation() -> void:
 
 
 func _play_reposition_animation() -> void:
+	if _play_boss_visual("move"):
+		return
 	if _animation_tween != null and _animation_tween.is_running():
 		_animation_tween.kill()
 	_reset_visual_pose()
@@ -1219,6 +1314,8 @@ func _play_reposition_animation() -> void:
 
 
 func _play_melee_attack_animation() -> void:
+	if _play_boss_visual("attack"):
+		return
 	if _animation_tween != null and _animation_tween.is_running():
 		_animation_tween.kill()
 	_reset_visual_pose()
@@ -1242,6 +1339,8 @@ func _play_melee_attack_animation() -> void:
 
 
 func _play_ranged_attack_animation(to_player: Vector2) -> void:
+	if _play_boss_visual("attack"):
+		return
 	if _animation_tween != null and _animation_tween.is_running():
 		_animation_tween.kill()
 	_reset_visual_pose()
@@ -1263,6 +1362,8 @@ func _play_ranged_attack_animation(to_player: Vector2) -> void:
 
 
 func _play_battle_entry_animation() -> void:
+	if _play_boss_visual("move"):
+		return
 	if _animation_tween != null and _animation_tween.is_running():
 		_animation_tween.kill()
 	_reset_visual_pose()
@@ -1281,3 +1382,162 @@ func _reset_visual_pose() -> void:
 	visual.rotation = _visual_base_rotation
 	visual.modulate = Color(1, 1, 1, 1)
 	visual.color = _base_color
+	if _sprites_ready and _sprite != null:
+		_sprite.position = _sprite_base_position
+		_sprite.scale = Vector2.ONE
+		_sprite.rotation = 0.0
+		_apply_boss_sprite_style()
+
+
+func _setup_boss_sprite() -> void:
+	if visual == null:
+		return
+	var fallback_visual := visual
+	var boss_key := _boss_sprite_key()
+	if _sprites_ready and _sprite != null and is_instance_valid(_sprite) and _sprite_boss_key == boss_key:
+		_remove_legacy_visual_node(fallback_visual)
+		_purge_duplicate_boss_visuals(_sprite)
+		_apply_boss_sprite_style()
+		_play_boss_visual("idle")
+		return
+	_current_visual_animation = ""
+	var sprite_options := {
+		"name": "BossSprite",
+		"canvas_size": BOSS_SPRITE_CANVAS_SIZE,
+		"target_height": BOSS_SPRITE_TARGET_HEIGHT,
+		"max_width": BOSS_SPRITE_MAX_WIDTH,
+		"foot_margin": BOSS_SPRITE_FOOT_MARGIN,
+		"initial_animation": "idle",
+		"hide_fallback_on_missing": true,
+	}
+	_sprite = PRODUCTION_ANIMATION_LOADER.create_sprite(
+		self,
+		_sprite,
+		fallback_visual,
+		_boss_sprite_dirs(boss_key),
+		BOSS_SPRITE_ANIMATIONS.get(boss_key, {}),
+		sprite_options
+	)
+	_sprites_ready = _sprite != null
+	_sprite_boss_key = boss_key if _sprites_ready else ""
+	_remove_legacy_visual_node(fallback_visual)
+	_purge_duplicate_boss_visuals(_sprite)
+	if _sprites_ready:
+		_sprite_base_position = _sprite.position
+		_apply_boss_sprite_style()
+		_play_boss_visual("idle")
+
+
+func _boss_sprite_key() -> String:
+	if _mechanic_type == "system_admin":
+		return "system_admin"
+	if BOSS_SPRITE_FOLDERS.has(_mechanic_type):
+		return _mechanic_type
+	return "threshold_warden"
+
+
+func _boss_sprite_dirs(boss_key: String) -> Array:
+	if boss_key == "system_admin":
+		return [
+			"res://assets/production_art/models/characters/player",
+		]
+	var folder := String(BOSS_SPRITE_FOLDERS.get(boss_key, BOSS_SPRITE_FOLDERS["threshold_warden"]))
+	return [
+		"res://assets/production_art/models/bosses/%s" % folder,
+	]
+
+
+func _apply_boss_sprite_style() -> void:
+	if _sprite == null or not is_instance_valid(_sprite):
+		return
+	if _boss_sprite_key() == "system_admin":
+		_sprite.modulate = Color(0.78, 0.48, 1.0, 0.96)
+		_sprite.skew = -0.06
+	else:
+		_sprite.modulate = Color(1, 1, 1, 1)
+		_sprite.skew = 0.0
+
+
+func _play_boss_visual(animation_name: String) -> bool:
+	if not _sprites_ready or _sprite == null or _sprite.sprite_frames == null:
+		return false
+	_update_boss_sprite_direction()
+	var resolved_animation := animation_name
+	if not _sprite.sprite_frames.has_animation(resolved_animation):
+		if resolved_animation.begins_with("teleport_") and _sprite.sprite_frames.has_animation("move"):
+			resolved_animation = "move"
+		else:
+			resolved_animation = "idle"
+	if not _sprite.sprite_frames.has_animation(resolved_animation):
+		return false
+	if _current_visual_animation == resolved_animation and _sprite.is_playing():
+		return true
+	_current_visual_animation = resolved_animation
+	_sprite.play(resolved_animation)
+	return true
+
+
+func _update_boss_sprite_direction() -> void:
+	if not _sprites_ready or _sprite == null:
+		return
+	if absf(velocity.x) > 1.0:
+		_sprite.flip_h = velocity.x < 0.0
+	elif _player != null and is_instance_valid(_player):
+		var offset_x := _player.global_position.x - global_position.x
+		if not is_zero_approx(offset_x):
+			_sprite.flip_h = offset_x < 0.0
+
+
+func _remove_legacy_visual_node(fallback_visual: ColorRect) -> void:
+	if fallback_visual == null:
+		return
+	_hide_legacy_canvas_item(fallback_visual)
+	if fallback_visual.name == "HiddenLegacyVisual":
+		visual = fallback_visual
+		if fallback_visual.get_parent() == null:
+			add_child(fallback_visual)
+		return
+	var dummy := get_node_or_null("HiddenLegacyVisual") as ColorRect
+	if dummy == null:
+		dummy = ColorRect.new()
+		dummy.name = "HiddenLegacyVisual"
+		add_child(dummy)
+	dummy.position = fallback_visual.position
+	dummy.size = fallback_visual.size
+	dummy.visible = false
+	dummy.modulate = Color(1, 1, 1, 0)
+	dummy.self_modulate = Color(1, 1, 1, 0)
+	dummy.color = Color(0, 0, 0, 0)
+	dummy.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	visual = dummy
+	if fallback_visual.get_parent() == self and is_instance_valid(fallback_visual):
+		remove_child(fallback_visual)
+		fallback_visual.free()
+
+
+func _purge_duplicate_boss_visuals(keep_sprite: AnimatedSprite2D) -> void:
+	for child in get_children():
+		if child == keep_sprite:
+			continue
+		if child is AnimatedSprite2D and String(child.name) == "BossSprite":
+			remove_child(child)
+			child.free()
+		elif child is ColorRect and String(child.name) != "HiddenLegacyVisual":
+			_hide_legacy_canvas_item(child as CanvasItem)
+			remove_child(child)
+			child.free()
+
+
+func _hide_legacy_canvas_item(item: CanvasItem) -> void:
+	if item == null:
+		return
+	item.visible = false
+	item.modulate = Color(1, 1, 1, 0)
+	item.self_modulate = Color(1, 1, 1, 0)
+	if item is ColorRect:
+		(item as ColorRect).color = Color(0, 0, 0, 0)
+	if item is Control:
+		(item as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for child in item.get_children():
+		if child is CanvasItem:
+			_hide_legacy_canvas_item(child as CanvasItem)

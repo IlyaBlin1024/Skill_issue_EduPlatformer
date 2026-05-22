@@ -34,10 +34,25 @@ const PLAYER_DEFAULT_AIR_JUMPS := 1
 const DEFAULT_MIN_CRITICAL_PATH_ROOMS := 5
 const SOLID_GEOMETRY_LAYER := 1
 const ONE_WAY_GEOMETRY_LAYER := 2
+const LEVEL_ART_ROOT := "res://assets/production_art/levels"
+const LEVEL_ART_FOLDERS := {
+	"tutorial": "tutorial",
+	"level_01": "level_01_variables",
+	"level_02": "level_02_if_else",
+	"level_03": "level_03_loops",
+	"level_04": "level_04_functions",
+	"level_05": "level_05_integration",
+}
+
+var _level_background_texture: Texture2D = null
+var _level_ground_texture: Texture2D = null
+var _level_wall_texture: Texture2D = null
+var _level_platform_texture: Texture2D = null
 
 
 func generate(geometry_root: Node2D, backdrop: ColorRect, config: Dictionary) -> Dictionary:
 	_clear_geometry(geometry_root)
+	_load_level_art(String(config.get("id", "level_01")))
 	var settings_variant: Variant = config.get("generation", {})
 	var settings: Dictionary = settings_variant if typeof(settings_variant) == TYPE_DICTIONARY else {}
 
@@ -558,7 +573,7 @@ func _add_shaft_platform(geometry_root: Node2D, surfaces: Array, platform_x: flo
 	})
 
 
-func _add_segment(geometry_root: Node2D, center: Vector2, size: Vector2, color: Color, one_way: bool = false) -> void:
+func _add_segment(geometry_root: Node2D, center: Vector2, size: Vector2, _color: Color, one_way: bool = false) -> void:
 	var body := StaticBody2D.new()
 	body.position = center
 	body.add_to_group("level_geometry")
@@ -566,17 +581,27 @@ func _add_segment(geometry_root: Node2D, center: Vector2, size: Vector2, color: 
 	body.collision_mask = 0
 	var collision := CollisionShape2D.new()
 	var shape := RectangleShape2D.new()
-	shape.size = size
+	var collision_size := Vector2(size.x, maxf(10.0, size.y - 6.0)) if one_way else size
+	shape.size = collision_size
+	if one_way:
+		collision.position = Vector2(0.0, (collision_size.y - size.y) * 0.5)
 	collision.shape = shape
 	if one_way:
 		collision.one_way_collision = true
 		collision.one_way_collision_margin = 2.0
 	body.add_child(collision)
-	var visual := ColorRect.new()
-	visual.color = color
-	visual.position = -size * 0.5
-	visual.size = size
-	body.add_child(visual)
+	var texture := _texture_for_segment(size, one_way)
+	if texture != null:
+		var visual := TextureRect.new()
+		visual.name = "ProductionTexture"
+		visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		visual.position = -size * 0.5
+		visual.size = size
+		visual.texture = texture
+		visual.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		visual.stretch_mode = TextureRect.STRETCH_TILE
+		visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		body.add_child(visual)
 	geometry_root.add_child(body)
 
 
@@ -592,6 +617,52 @@ func _apply_backdrop(backdrop: ColorRect, bounds: Rect2) -> void:
 	backdrop.color = BACKDROP_COLOR
 	backdrop.position = bounds.position - Vector2(220.0, 220.0)
 	backdrop.size = bounds.size + Vector2(440.0, 440.0)
+	if _level_background_texture != null:
+		_set_texture_overlay(backdrop, _level_background_texture, false)
+
+
+func _load_level_art(level_id: String) -> void:
+	var folder := String(LEVEL_ART_FOLDERS.get(level_id, LEVEL_ART_FOLDERS.get("level_01", "level_01_variables")))
+	var root := "%s/%s" % [LEVEL_ART_ROOT, folder]
+	_level_background_texture = _load_texture("%s/backgrounds/background.png" % root)
+	_level_ground_texture = _load_texture("%s/tilesets/tileset_ground.png" % root)
+	_level_wall_texture = _load_texture("%s/tilesets/tileset_walls.png" % root)
+	_level_platform_texture = _load_texture("%s/platforms/platform_one_way.png" % root)
+
+
+func _load_texture(path: String) -> Texture2D:
+	if not ResourceLoader.exists(path):
+		return null
+	return ResourceLoader.load(path) as Texture2D
+
+
+func _texture_for_segment(size: Vector2, one_way: bool) -> Texture2D:
+	if one_way:
+		return _level_platform_texture
+	if size.y <= FLOOR_THICKNESS + 4.0 and size.x > size.y:
+		return _level_ground_texture
+	return _level_wall_texture
+
+
+func _set_texture_overlay(control: Control, texture: Texture2D, tile: bool) -> void:
+	if texture == null:
+		return
+	control.clip_contents = true
+	if control is ColorRect:
+		var color_rect := control as ColorRect
+		color_rect.color = Color(color_rect.color.r, color_rect.color.g, color_rect.color.b, 0.0)
+	var texture_rect := control.get_node_or_null("ProductionTexture") as TextureRect
+	if texture_rect == null:
+		texture_rect = TextureRect.new()
+		texture_rect.name = "ProductionTexture"
+		texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		control.add_child(texture_rect)
+	texture_rect.texture = texture
+	texture_rect.position = Vector2.ZERO
+	texture_rect.size = control.size
+	texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	texture_rect.stretch_mode = TextureRect.STRETCH_TILE if tile else TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	texture_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 
 func _expand_bounds_with_room(bounds: Rect2, center: Vector2, room_width: float, room_height: float) -> Rect2:

@@ -9,6 +9,15 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Write-SkillIssueBanner([string]$Message) {
+    Write-Host ""
+    Write-Host "========================================" -ForegroundColor DarkYellow
+    Write-Host "              SKILL ISSUE               " -ForegroundColor Yellow
+    Write-Host "========================================" -ForegroundColor DarkYellow
+    Write-Host $Message -ForegroundColor Cyan
+    Write-Host ""
+}
+
 function Resolve-InstallRoot {
     if ($InstallDir) {
         return [System.IO.Path]::GetFullPath($InstallDir)
@@ -45,7 +54,10 @@ function New-DesktopShortcut([string]$TargetPath, [string]$WorkingDirectory) {
     $shortcut.TargetPath = $TargetPath
     $shortcut.WorkingDirectory = $WorkingDirectory
     $shortcut.Description = "Launch Skill Issue"
-    $iconPath = Join-Path $WorkingDirectory "SkillIssue.exe"
+    $iconPath = Join-Path $WorkingDirectory "SkillIssue.ico"
+    if (-not (Test-Path -LiteralPath $iconPath)) {
+        $iconPath = Join-Path $WorkingDirectory "SkillIssue.exe"
+    }
     if (Test-Path -LiteralPath $iconPath) {
         $shortcut.IconLocation = $iconPath
     }
@@ -56,7 +68,7 @@ $installRoot = Resolve-InstallRoot
 $archive = Resolve-ArchivePath
 $staging = Join-Path $env:TEMP ("Skill-Issue-install-" + [Guid]::NewGuid().ToString("N"))
 
-Write-Host "Installing Skill Issue to: $installRoot"
+Write-SkillIssueBanner "Installing Skill Issue to: $installRoot"
 if (Test-Path -LiteralPath $staging) {
     Remove-Item -LiteralPath $staging -Recurse -Force
 }
@@ -73,11 +85,12 @@ if (-not (Test-Path -LiteralPath $launcher)) {
 
 if (-not $NoShortcut) {
     New-DesktopShortcut $launcher $installRoot
+    Write-Host "Desktop shortcut created." -ForegroundColor Green
 }
 
 if (-not $NoLaunch) {
-    Write-Host "Starting Skill Issue..."
+    Write-Host "Starting Skill Issue..." -ForegroundColor Green
     Start-Process -FilePath $launcher -WorkingDirectory $installRoot
 } else {
-    Write-Host "Install complete. Launch skipped by -NoLaunch."
+    Write-Host "Install complete. Launch skipped by -NoLaunch." -ForegroundColor Green
 }

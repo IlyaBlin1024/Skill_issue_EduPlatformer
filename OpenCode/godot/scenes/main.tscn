@@ -16,7 +16,7 @@ size = Vector2(84, 56)
 size = Vector2(72, 54)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_enemy"]
-size = Vector2(28, 48)
+size = Vector2(42, 72)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_exit"]
 size = Vector2(88, 120)
@@ -38,16 +38,19 @@ position = Vector2(120, 540)
 script = ExtResource("8_altar")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AltarA" unique_id=1094156724]
+position = Vector2(0, -6)
 shape = SubResource("RectangleShape2D_altar")
 
 [node name="Visual" type="ColorRect" parent="AltarA" unique_id=2034009484]
+visible = false
 offset_left = -34.0
 offset_top = -26.0
 offset_right = 34.0
 offset_bottom = 22.0
-color = Color(0.364706, 0.627451, 0.847059, 1)
+color = Color(0.364706, 0.627451, 0.847059, 0)
 
 [node name="Label" type="Label" parent="AltarA" unique_id=1237038611]
+visible = false
 offset_left = -36.0
 offset_top = -58.0
 offset_right = 40.0
@@ -60,16 +63,19 @@ position = Vector2(240, 420)
 script = ExtResource("7_chest")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ChestA" unique_id=2124096655]
+position = Vector2(0, -7)
 shape = SubResource("RectangleShape2D_chest")
 
 [node name="Visual" type="ColorRect" parent="ChestA" unique_id=1115231189]
+visible = false
 offset_left = -28.0
 offset_top = -24.0
 offset_right = 28.0
 offset_bottom = 20.0
-color = Color(0.847059, 0.666667, 0.27451, 1)
+color = Color(0.847059, 0.666667, 0.27451, 0)
 
 [node name="Label" type="Label" parent="ChestA" unique_id=1369727311]
+visible = false
 offset_left = -34.0
 offset_top = -54.0
 offset_right = 37.0
@@ -82,16 +88,19 @@ position = Vector2(480, 260)
 script = ExtResource("7_chest")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ChestB" unique_id=2106015177]
+position = Vector2(0, -7)
 shape = SubResource("RectangleShape2D_chest")
 
 [node name="Visual" type="ColorRect" parent="ChestB" unique_id=2026389550]
+visible = false
 offset_left = -28.0
 offset_top = -24.0
 offset_right = 28.0
 offset_bottom = 20.0
-color = Color(0.847059, 0.666667, 0.27451, 1)
+color = Color(0.847059, 0.666667, 0.27451, 0)
 
 [node name="Label" type="Label" parent="ChestB" unique_id=435729096]
+visible = false
 offset_left = -34.0
 offset_top = -54.0
 offset_right = 37.0
@@ -104,29 +113,31 @@ position = Vector2(320, 520)
 script = ExtResource("4_encounter")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyEncounterA" unique_id=1241046250]
+position = Vector2(0, -12)
 shape = SubResource("RectangleShape2D_enemy")
 
 [node name="Visual" type="ColorRect" parent="EnemyEncounterA" unique_id=1058092567]
-offset_left = -14.0
-offset_top = -24.0
-offset_right = 14.0
+visible = false
+offset_left = -21.0
+offset_top = -48.0
+offset_right = 21.0
 offset_bottom = 24.0
-color = Color(0.788235, 0.278431, 0.321569, 1)
+color = Color(0.788235, 0.278431, 0.321569, 0)
 
 [node name="HpLabel" type="Label" parent="EnemyEncounterA" unique_id=681644677]
-offset_left = -30.0
-offset_top = -60.0
-offset_right = 36.0
-offset_bottom = -34.0
+offset_left = -42.0
+offset_top = -92.0
+offset_right = 44.0
+offset_bottom = -66.0
 text = "HP 100"
 horizontal_alignment = 1
 
 [node name="StateLabel" type="Label" parent="EnemyEncounterA" unique_id=1423338263]
 visible = false
-offset_left = -46.0
-offset_top = -84.0
-offset_right = 48.0
-offset_bottom = -62.0
+offset_left = -58.0
+offset_top = -118.0
+offset_right = 60.0
+offset_bottom = -94.0
 text = "READY"
 horizontal_alignment = 1
 
@@ -136,29 +147,31 @@ script = ExtResource("4_encounter")
 difficulty = "normal"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyEncounterB" unique_id=370325541]
+position = Vector2(0, -12)
 shape = SubResource("RectangleShape2D_enemy")
 
 [node name="Visual" type="ColorRect" parent="EnemyEncounterB" unique_id=430457436]
-offset_left = -14.0
-offset_top = -24.0
-offset_right = 14.0
+visible = false
+offset_left = -21.0
+offset_top = -48.0
+offset_right = 21.0
 offset_bottom = 24.0
-color = Color(0.721569, 0.34902, 0.219608, 1)
+color = Color(0.721569, 0.34902, 0.219608, 0)
 
 [node name="HpLabel" type="Label" parent="EnemyEncounterB" unique_id=2017959276]
-offset_left = -30.0
-offset_top = -60.0
-offset_right = 36.0
-offset_bottom = -34.0
+offset_left = -42.0
+offset_top = -92.0
+offset_right = 44.0
+offset_bottom = -66.0
 text = "HP 150"
 horizontal_alignment = 1
 
 [node name="StateLabel" type="Label" parent="EnemyEncounterB" unique_id=1237454104]
 visible = false
-offset_left = -46.0
-offset_top = -84.0
-offset_right = 48.0
-offset_bottom = -62.0
+offset_left = -58.0
+offset_top = -118.0
+offset_right = 60.0
+offset_bottom = -94.0
 text = "READY"
 horizontal_alignment = 1
 

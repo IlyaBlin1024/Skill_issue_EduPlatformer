@@ -18,6 +18,15 @@ const BOSS_HALF_HEIGHT := 75.0
 const COMBAT_PROJECTILE_SCRIPT := preload("res://scripts/enemy_projectile.gd")
 const PAUSE_MENU_SCENE := preload("res://scenes/ui/pause_menu.tscn")
 const INVENTORY_MENU_SCENE := preload("res://scenes/ui/inventory_menu.tscn")
+const PLAYER_DIALOGUE_TEXTURE: Texture2D = preload("res://assets/production_art/models/characters/player/player_idle_01.png")
+const BOSS_ARENA_ART_ROOT := "res://assets/production_art/boss_arenas"
+const BOSS_ARENA_FOLDERS := {
+	"threshold_warden": "boss_01_threshold_warden",
+	"logic_spider": "boss_02_logic_spider",
+	"assembly_golem": "boss_03_assembly_golem",
+	"archivist": "boss_04_archivist",
+	"system_admin": "boss_05_system_admin",
+}
 
 signal dialogue_sequence_finished
 
@@ -29,9 +38,13 @@ signal dialogue_sequence_finished
 @onready var boss: BossEncounter = $BossEncounter
 @onready var backdrop: ColorRect = $Backdrop
 @onready var mist_band: ColorRect = $MistBand
+@onready var floor_shape: CollisionShape2D = $Floor/CollisionShape2D
 @onready var floor_visual: ColorRect = $Floor/Visual
+@onready var ceiling_shape: CollisionShape2D = $Ceiling/CollisionShape2D
 @onready var ceiling_visual: ColorRect = $Ceiling/Visual
+@onready var left_wall_shape: CollisionShape2D = $LeftWall/CollisionShape2D
 @onready var left_wall_visual: ColorRect = $LeftWall/Visual
+@onready var right_wall_shape: CollisionShape2D = $RightWall/CollisionShape2D
 @onready var right_wall_visual: ColorRect = $RightWall/Visual
 @onready var platform_a_shape: CollisionShape2D = $PlatformA/CollisionShape2D
 @onready var platform_a_visual: ColorRect = $PlatformA/Visual
@@ -85,6 +98,11 @@ var _base_player_parry_window := 0.22
 var _player_melee_damage_bonus := 0
 var _player_ranged_damage_bonus := 0
 var _player_failure_damage_reduction := 0
+var _arena_background_texture: Texture2D = null
+var _arena_floor_texture: Texture2D = null
+var _arena_platform_texture: Texture2D = null
+var _arena_foreground_texture: Texture2D = null
+var _arena_hazard_texture: Texture2D = null
 var _messages := {
 	"intro": "Boss chamber reached. Reprogram and defeat the Threshold Warden.",
 	"defeat": "Knight integrity lost. Respawning...",
@@ -141,17 +159,8 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey:
-		var key_event := event as InputEventKey
-		if key_event.pressed and not key_event.echo:
-			if key_event.keycode == KEY_ESCAPE and not _dialogue_active and not terminal.visible:
-				_toggle_pause_menu()
-				get_viewport().set_input_as_handled()
-				return
-			if key_event.keycode == KEY_I and not _dialogue_active and not terminal.visible:
-				_toggle_inventory_menu()
-				get_viewport().set_input_as_handled()
-				return
+	if _handle_overlay_shortcut(event):
+		return
 	if not _dialogue_active:
 		return
 	if event.is_action_pressed("attack_primary") or event.is_action_pressed("jump") or event.is_action_pressed("interact"):
@@ -159,12 +168,39 @@ func _input(event: InputEvent) -> void:
 		_advance_dialogue()
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	_handle_overlay_shortcut(event)
+
+
+func _handle_overlay_shortcut(event: InputEvent) -> bool:
+	if _dialogue_active or terminal.visible:
+		return false
+	if event.is_action_pressed("ui_cancel"):
+		_toggle_pause_menu()
+		get_viewport().set_input_as_handled()
+		return true
+	if event is InputEventKey:
+		var key_event := event as InputEventKey
+		if key_event.pressed and not key_event.echo:
+			if key_event.keycode == KEY_ESCAPE or key_event.keycode == KEY_P:
+				_toggle_pause_menu()
+				get_viewport().set_input_as_handled()
+				return true
+			if key_event.keycode == KEY_I:
+				_toggle_inventory_menu()
+				get_viewport().set_input_as_handled()
+				return true
+	return false
+
+
 func _ensure_overlay_menus() -> void:
 	if _pause_menu == null:
 		_pause_menu = PAUSE_MENU_SCENE.instantiate() as CanvasLayer
+		_pause_menu.process_mode = Node.PROCESS_MODE_ALWAYS
 		add_child(_pause_menu)
 	if _inventory_menu == null:
 		_inventory_menu = INVENTORY_MENU_SCENE.instantiate() as CanvasLayer
+		_inventory_menu.process_mode = Node.PROCESS_MODE_ALWAYS
 		add_child(_inventory_menu)
 
 
@@ -215,6 +251,7 @@ func _apply_boss_config(config: Dictionary) -> void:
 
 
 func _apply_boss_environment(boss_config: Dictionary) -> void:
+	_load_boss_arena_art(String(boss_config.get("mechanic_type", "threshold_warden")))
 	var environment_variant: Variant = boss_config.get("environment", {})
 	if typeof(environment_variant) != TYPE_DICTIONARY:
 		_apply_boss_arena_layout(boss_config, {})
@@ -232,6 +269,7 @@ func _apply_boss_environment(boss_config: Dictionary) -> void:
 	platform_c_visual.color = platform_color
 	platform_d_visual.color = platform_color
 	platform_e_visual.color = platform_color
+	_apply_boss_arena_textures()
 	_apply_boss_arena_layout(boss_config, environment_config)
 
 
@@ -259,6 +297,7 @@ func _apply_boss_arena_layout(boss_config: Dictionary, _environment_config: Dict
 	mist_band.color = Color(mist_band.color.r, mist_band.color.g, mist_band.color.b, mist_alpha)
 	var platform_entries_variant: Variant = layout_config.get("platforms", [])
 	if typeof(platform_entries_variant) != TYPE_ARRAY:
+		_align_arena_static_visuals_to_collision()
 		return
 	var platform_entries: Array = platform_entries_variant
 	var shapes: Array[CollisionShape2D] = [platform_a_shape, platform_b_shape, platform_c_shape, platform_d_shape, platform_e_shape]
@@ -268,6 +307,7 @@ func _apply_boss_arena_layout(boss_config: Dictionary, _environment_config: Dict
 		if typeof(entry_variant) != TYPE_DICTIONARY:
 			continue
 		_apply_platform_entry(shapes[index], visuals[index], entry_variant as Dictionary)
+	_align_arena_static_visuals_to_collision()
 
 
 func _apply_platform_entry(shape_node: CollisionShape2D, visual_node: ColorRect, entry: Dictionary) -> void:
@@ -280,13 +320,110 @@ func _apply_platform_entry(shape_node: CollisionShape2D, visual_node: ColorRect,
 	var platform_height: float = float(entry.get("height", 28.0))
 	var platform_x: float = float(entry.get("x", 960.0))
 	var platform_y: float = float(entry.get("y", 640.0))
+	var collision_height: float = maxf(10.0, platform_height)
 	if shape_node.shape is RectangleShape2D:
-		(shape_node.shape as RectangleShape2D).size = Vector2(platform_width, platform_height)
+		(shape_node.shape as RectangleShape2D).size = Vector2(platform_width, collision_height)
 	shape_node.position = Vector2(platform_x, platform_y)
+	shape_node.one_way_collision_margin = 0.0
 	visual_node.offset_left = platform_x - platform_width * 0.5
 	visual_node.offset_top = platform_y - platform_height * 0.5
 	visual_node.offset_right = platform_x + platform_width * 0.5
 	visual_node.offset_bottom = platform_y + platform_height * 0.5
+	if _arena_platform_texture != null:
+		_set_texture_overlay(visual_node, _arena_platform_texture, true)
+	_resize_texture_overlays(visual_node)
+
+
+func _load_boss_arena_art(mechanic_type: String) -> void:
+	var folder := String(BOSS_ARENA_FOLDERS.get(mechanic_type, BOSS_ARENA_FOLDERS.get("threshold_warden", "boss_01_threshold_warden")))
+	var root := "%s/%s" % [BOSS_ARENA_ART_ROOT, folder]
+	_arena_background_texture = _load_texture("%s/background.png" % root)
+	_arena_floor_texture = _load_texture("%s/floor.png" % root)
+	_arena_platform_texture = _load_texture("%s/platforms.png" % root)
+	_arena_foreground_texture = _load_texture("%s/foreground_props.png" % root)
+	_arena_hazard_texture = _load_texture("%s/hazard_props.png" % root)
+
+
+func _apply_boss_arena_textures() -> void:
+	if _arena_background_texture != null:
+		_set_texture_overlay(backdrop, _arena_background_texture, false)
+	if _arena_hazard_texture != null:
+		_set_named_texture_overlay(backdrop, "HazardProps", _arena_hazard_texture, false)
+	if _arena_foreground_texture != null:
+		_set_named_texture_overlay(backdrop, "ForegroundProps", _arena_foreground_texture, false)
+	if _arena_floor_texture != null:
+		_set_texture_overlay(floor_visual, _arena_floor_texture, true)
+		_set_texture_overlay(ceiling_visual, _arena_floor_texture, true)
+		_set_texture_overlay(left_wall_visual, _arena_floor_texture, true)
+		_set_texture_overlay(right_wall_visual, _arena_floor_texture, true)
+	for platform_visual in [platform_a_visual, platform_b_visual, platform_c_visual, platform_d_visual, platform_e_visual]:
+		if platform_visual is Control and _arena_platform_texture != null:
+			_set_texture_overlay(platform_visual as Control, _arena_platform_texture, true)
+
+
+func _load_texture(path: String) -> Texture2D:
+	if not ResourceLoader.exists(path):
+		return null
+	return ResourceLoader.load(path) as Texture2D
+
+
+func _set_texture_overlay(control: Control, texture: Texture2D, tile: bool) -> void:
+	_set_named_texture_overlay(control, "ProductionTexture", texture, tile)
+
+
+func _set_named_texture_overlay(control: Control, overlay_name: String, texture: Texture2D, tile: bool) -> void:
+	if texture == null:
+		return
+	control.clip_contents = true
+	if control is ColorRect:
+		var color_rect := control as ColorRect
+		color_rect.color = Color(color_rect.color.r, color_rect.color.g, color_rect.color.b, 0.0)
+	var texture_rect := control.get_node_or_null(overlay_name) as TextureRect
+	if texture_rect == null:
+		texture_rect = TextureRect.new()
+		texture_rect.name = overlay_name
+		texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		control.add_child(texture_rect)
+	texture_rect.texture = texture
+	texture_rect.position = Vector2.ZERO
+	texture_rect.size = control.size
+	texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	texture_rect.stretch_mode = TextureRect.STRETCH_TILE if tile else TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	texture_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+
+func _align_arena_static_visuals_to_collision() -> void:
+	_sync_visual_to_collision(floor_shape, floor_visual)
+	_sync_visual_to_collision(ceiling_shape, ceiling_visual)
+	_sync_visual_to_collision(left_wall_shape, left_wall_visual)
+	_sync_visual_to_collision(right_wall_shape, right_wall_visual)
+	for pair in [
+		[platform_a_shape, platform_a_visual],
+		[platform_b_shape, platform_b_visual],
+		[platform_c_shape, platform_c_visual],
+		[platform_d_shape, platform_d_visual],
+		[platform_e_shape, platform_e_visual],
+	]:
+		_sync_visual_to_collision(pair[0] as CollisionShape2D, pair[1] as ColorRect)
+
+
+func _sync_visual_to_collision(shape_node: CollisionShape2D, visual_node: ColorRect) -> void:
+	if shape_node == null or visual_node == null or not (shape_node.shape is RectangleShape2D):
+		return
+	var rect_size: Vector2 = (shape_node.shape as RectangleShape2D).size
+	visual_node.offset_left = shape_node.position.x - rect_size.x * 0.5
+	visual_node.offset_top = shape_node.position.y - rect_size.y * 0.5
+	visual_node.offset_right = shape_node.position.x + rect_size.x * 0.5
+	visual_node.offset_bottom = shape_node.position.y + rect_size.y * 0.5
+	_resize_texture_overlays(visual_node)
+
+
+func _resize_texture_overlays(control: Control) -> void:
+	for child in control.get_children():
+		if child is TextureRect:
+			var texture_rect := child as TextureRect
+			texture_rect.position = Vector2.ZERO
+			texture_rect.size = control.size
 
 
 func _default_arena_layout_for_mechanic(mechanic_type: String) -> Dictionary:
@@ -379,7 +516,7 @@ func _configure_fade_layer() -> void:
 
 
 func _run_boss_room_intro_sequence() -> void:
-	await _fade_from_black(0.8)
+	await _fade_from_black(0.5)
 	_start_intro_cutscene()
 
 
@@ -395,6 +532,7 @@ func _handle_boss_resolution(success: bool, result: Dictionary) -> void:
 	player.set_terminal_locked(false)
 	if success:
 		_apply_runtime_solution_effects(result)
+		GameState.log_event("boss_strategy_code_succeeded", {"level_id": _level_id, "boss_name": boss.boss_name})
 		boss.refresh_strategy()
 		if _boss_fight_active:
 			boss.resume_after_terminal(true)
@@ -409,6 +547,7 @@ func _handle_boss_resolution(success: bool, result: Dictionary) -> void:
 
 	var damage_to_player: int = int(result.get("damage_to_player", BOSS_DAMAGE_ON_FAILURE))
 	damage_to_player = maxi(damage_to_player - _player_failure_damage_reduction, 0)
+	GameState.log_event("boss_strategy_code_failed", {"level_id": _level_id, "boss_name": boss.boss_name, "damage_to_player": damage_to_player})
 	var player_defeated: bool = player.apply_damage(damage_to_player)
 	if _boss_fight_active:
 		boss.resume_after_terminal(true)
@@ -503,6 +642,7 @@ func _on_boss_defeated() -> void:
 	_boss_fight_active = false
 	_clear_player_projectiles()
 	_reset_player_combo_state()
+	GameState.log_event("boss_defeated", {"level_id": _level_id, "boss_name": boss.boss_name})
 	GameState.mark_boss_completed(_level_id)
 	hud.set_boss_status("Boss defeated.")
 	hud.update_enemy_counter(0, 1)
@@ -593,6 +733,7 @@ func _apply_player_combo_step(combo_mode: String, combo_index: int, facing_direc
 			return
 		var melee_damage: int = PLAYER_MELEE_COMBO_DAMAGE[min(combo_index, PLAYER_MELEE_COMBO_DAMAGE.size() - 1)] + _player_melee_damage_bonus
 		var defeated: bool = boss.apply_combat_result({"damage": melee_damage})
+		GameState.log_event("boss_damage_dealt", {"amount": melee_damage, "mode": combo_mode, "combo_index": combo_index, "level_id": _level_id})
 		hud.show_message(_combo_step_message(combo_mode, combo_index), 0.8)
 		if defeated:
 			_reset_player_combo_state()
@@ -702,6 +843,7 @@ func _on_player_projectile_hit(projectile: EnemyProjectile, target: Node, damage
 	_player_projectiles.erase(projectile)
 	if target is BossEncounter:
 		var defeated: bool = (target as BossEncounter).apply_combat_result({"damage": damage})
+		GameState.log_event("boss_damage_dealt", {"amount": damage, "mode": "ranged_projectile", "level_id": _level_id})
 		hud.show_message("Ranged hit confirmed.", 0.9)
 		if defeated:
 			_reset_player_combo_state()
@@ -902,11 +1044,30 @@ func _portrait_color_for_entry(entry: Dictionary) -> Color:
 
 
 func _show_runtime_dialogue_line(speaker: String, text: String, portrait_color: Color) -> void:
-	dialogue_box.show_line(speaker, text, portrait_color)
+	dialogue_box.show_line(speaker, text, portrait_color, _portrait_texture_for_current_dialogue(), _dialogue_focus_is_boss())
 
 
 func _hide_runtime_dialogue() -> void:
 	dialogue_box.hide_box()
+
+
+func _portrait_texture_for_current_dialogue() -> Texture2D:
+	if _dialogue_index < 0 or _dialogue_index >= _dialogue_entries.size():
+		return PLAYER_DIALOGUE_TEXTURE
+	var entry: Dictionary = _dialogue_entries[_dialogue_index]
+	var focus_target := entry.get("focus_target", player) as Node2D
+	if focus_target == boss and boss.has_method("get_dialogue_texture"):
+		var boss_texture: Variant = boss.call("get_dialogue_texture")
+		if boss_texture is Texture2D:
+			return boss_texture
+	return PLAYER_DIALOGUE_TEXTURE
+
+
+func _dialogue_focus_is_boss() -> bool:
+	if _dialogue_index < 0 or _dialogue_index >= _dialogue_entries.size():
+		return false
+	var entry: Dictionary = _dialogue_entries[_dialogue_index]
+	return (entry.get("focus_target", player) as Node2D) == boss
 
 
 func _should_use_q_for_boss_parry() -> bool:
@@ -920,12 +1081,19 @@ func _snap_combatants_to_floor() -> void:
 	var boss_half_height := BOSS_HALF_HEIGHT
 	if is_instance_valid(boss_collision_shape) and boss_collision_shape.shape is RectangleShape2D:
 		boss_half_height = (boss_collision_shape.shape as RectangleShape2D).size.y * 0.5
-	player.global_position = Vector2(_boss_arena_spawn.x, FLOOR_TOP_Y - player_half_height - 2.0)
-	boss.global_position = Vector2(boss.global_position.x, FLOOR_TOP_Y - boss_half_height - 2.0)
+	var floor_top_y := _floor_top_y()
+	player.global_position = Vector2(_boss_arena_spawn.x, floor_top_y - player_half_height)
+	boss.global_position = Vector2(boss.global_position.x, floor_top_y - boss_half_height)
 	player.velocity = Vector2.ZERO
 	boss.velocity = Vector2.ZERO
 	player.apply_floor_snap()
 	boss.apply_floor_snap()
+
+
+func _floor_top_y() -> float:
+	if is_instance_valid(floor_shape) and floor_shape.shape is RectangleShape2D:
+		return floor_shape.global_position.y - (floor_shape.shape as RectangleShape2D).size.y * 0.5
+	return FLOOR_TOP_Y
 
 
 func _fade_from_black(duration: float) -> void:
@@ -946,6 +1114,6 @@ func _play_room_outro_fade() -> void:
 	fade_rect.visible = true
 	fade_rect.color = Color(0, 0, 0, 0)
 	_fade_tween = create_tween()
-	_fade_tween.tween_property(fade_rect, "color:a", 1.0, 0.95)
+	_fade_tween.tween_property(fade_rect, "color:a", 1.0, 0.5)
 	await _fade_tween.finished
 	GameState.go_to_main_menu()

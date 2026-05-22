@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://c3lplq6q0gjks"
+path="res://.godot/imported/skill_issue_ascii_gold.fnt-89845ffb30c864b5d433c76ecd78094b.fontdata"
+
+[deps]
+
+source_file="res://assets/generated_menu/font/skill_issue_ascii_gold.fnt"
+dest_files=["res://.godot/imported/skill_issue_ascii_gold.fnt-89845ffb30c864b5d433c76ecd78094b.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

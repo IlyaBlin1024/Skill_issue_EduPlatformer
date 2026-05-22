@@ -186,32 +186,4 @@ theme_override_constants/margin_bottom = 14
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-color = Color(0.74902, 0.678431, 0.890196, 1)
-
-[node name="PortraitGlow" type="ColorRect" parent="Root/PortraitFrame/PortraitMargin/Portrait"]
-anchors_preset = 8
-anchor_left = 0.22
-anchor_top = 0.06
-anchor_right = 0.78
-anchor_bottom = 0.42
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(1, 1, 1, 0.12)
-
-[node name="PortraitBust" type="ColorRect" parent="Root/PortraitFrame/PortraitMargin/Portrait"]
-anchors_preset = 8
-anchor_left = 0.18
-anchor_top = 0.12
-anchor_right = 0.82
-anchor_bottom = 0.9
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(1, 1, 1, 0.18)
+color = Color(0, 0, 0, 0)

@@ -1,0 +1,10 @@
+﻿{
+    "loop":  false,
+    "frame_size":  [
+                       64,
+                       64
+                   ],
+    "frames":  8,
+    "fps":  12,
+    "pivot":  "bottom_center"
+}

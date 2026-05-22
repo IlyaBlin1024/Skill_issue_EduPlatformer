@@ -1,0 +1,18 @@
+﻿{
+    "generated_at":  "2026-05-09T17:55:18",
+    "style":  "pixel fantasy menu, gold bevel frame, cyan selected glow, dark parchment panels",
+    "note":  "Generated assets only; scenes are not wired yet.",
+    "folders":  [
+                    "backgrounds",
+                    "buttons",
+                    "cards",
+                    "card_art",
+                    "font"
+                ],
+    "font":  {
+                 "ascii_cells":  128,
+                 "bmfont":  "font/skill_issue_ascii_gold.fnt",
+                 "atlas":  "font/skill_issue_ascii_gold.png",
+                 "printable_range":  "32-126"
+             }
+}

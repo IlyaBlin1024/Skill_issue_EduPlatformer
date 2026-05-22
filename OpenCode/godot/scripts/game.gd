@@ -140,7 +140,7 @@ func _configure_fade_layer() -> void:
 
 
 func _run_level_intro_fade() -> void:
-	await _fade_from_black(0.8)
+	await _fade_from_black(0.5)
 	hud.show_message(_messages["intro"], 1.8)
 
 
@@ -165,7 +165,7 @@ func _play_level_outro_fade() -> void:
 	fade_rect.visible = true
 	fade_rect.color = Color(0, 0, 0, 0)
 	_fade_tween = create_tween()
-	_fade_tween.tween_property(fade_rect, "color:a", 1.0, 0.95)
+	_fade_tween.tween_property(fade_rect, "color:a", 1.0, 0.5)
 	await _fade_tween.finished
 	GameState.go_to_main_menu()
 
@@ -1135,6 +1135,7 @@ func _handle_combat_resolution(success: bool, result: Dictionary) -> void:
 		else:
 			_active_encounter.unlock_combat()
 			unlocked_count = 1
+		GameState.log_event("combat_unlocked", {"interaction_type": "combat", "level_theme": String(_level_config.get("theme", "")), "unlocked_count": unlocked_count})
 		hud.show_message("Combat unlocked for %d sentinel(s). Press Q, then keep the combo within 0.5 seconds." % unlocked_count, 2.2)
 		_show_runtime_effect_summary(result)
 		_active_unlock_group.clear()
@@ -1319,6 +1320,7 @@ func _apply_player_combo_step(target: EnemyEncounter, combo_mode: String, combo_
 		return
 	var melee_damage: int = PLAYER_MELEE_COMBO_DAMAGE[min(combo_index, PLAYER_MELEE_COMBO_DAMAGE.size() - 1)] + _player_melee_damage_bonus
 	var defeated: bool = target.apply_combat_result({"damage": melee_damage})
+	GameState.log_event("player_damage_dealt", {"amount": melee_damage, "target": "enemy", "mode": combo_mode, "combo_index": combo_index})
 	if defeated:
 		_reset_player_combo_state()
 		hud.show_message("Enemy defeated.", 1.0)
@@ -1466,6 +1468,7 @@ func _on_player_projectile_hit(projectile: EnemyProjectile, target: Node, damage
 	if target is EnemyEncounter:
 		var encounter := target as EnemyEncounter
 		var defeated: bool = encounter.apply_combat_result({"damage": damage})
+		GameState.log_event("player_damage_dealt", {"amount": damage, "target": "enemy", "mode": "ranged_projectile"})
 		if defeated:
 			hud.show_message("Ranged hit confirmed. Enemy defeated.", 1.4)
 		else:
@@ -1491,8 +1494,10 @@ func _handle_chest_resolution(success: bool, result: Dictionary) -> void:
 		_apply_adaptive_result("chest", result)
 		_apply_runtime_solution_effects(result, [])
 		_active_chest.mark_opened()
+		GameState.log_event("chest_opened_by_code", {"level_theme": String(_level_config.get("theme", ""))})
 		_show_runtime_effect_summary(result)
 	else:
+		GameState.log_event("chest_failed_by_code", {"level_theme": String(_level_config.get("theme", ""))})
 		_active_chest.reset_interaction()
 	_active_chest = null
 
@@ -1504,8 +1509,10 @@ func _handle_altar_resolution(success: bool, result: Dictionary) -> void:
 		_apply_adaptive_result("altar", result)
 		_apply_runtime_solution_effects(result, [])
 		_active_altar.mark_forged(String(result.get("weapon_summary", "Forged a standard glitch blade.")))
+		GameState.log_event("altar_forged_by_code", {"level_theme": String(_level_config.get("theme", ""))})
 		_show_runtime_effect_summary(result)
 	else:
+		GameState.log_event("altar_failed_by_code", {"level_theme": String(_level_config.get("theme", ""))})
 		_active_altar.reset_interaction()
 	_active_altar = null
 
@@ -1548,6 +1555,13 @@ func _set_adaptive_difficulty(interaction_type: String, value: String) -> void:
 	_adaptive_difficulty_state[interaction_type] = entry
 	if interaction_type == "combat":
 		_sync_enemy_difficulties(value)
+	GameState.log_event("adaptive_difficulty_changed", {
+		"interaction_type": interaction_type,
+		"level_theme": String(_level_config.get("theme", "")),
+		"from_difficulty": current_value,
+		"to_difficulty": value,
+		"reason": "adaptive_streak"
+	})
 	hud.show_message("Adaptive %s difficulty -> %s" % [interaction_type, value.capitalize()], 1.4)
 
 
@@ -1696,6 +1710,7 @@ func _on_player_defeated() -> void:
 
 
 func _on_encounter_defeated(_encounter: EnemyEncounter) -> void:
+	GameState.log_event("enemy_defeated", {"level_theme": _encounter.level_theme, "difficulty": _encounter.difficulty})
 	if _encounter == _player_combo_target:
 		_reset_player_combo_state()
 	_active_encounter = null

@@ -19,7 +19,9 @@ var _log_request: HTTPRequest
 var _export_request: HTTPRequest
 var _pending_request_kind := "validate"
 var _pending_export_path := ""
+var _pending_export_temp_path := ""
 var _log_queue: Array[Dictionary] = []
+var _backend_autostart_attempted := false
 
 
 func _ready() -> void:
@@ -44,11 +46,12 @@ func _ready() -> void:
 	_export_request.timeout = 30.0
 	add_child(_export_request)
 	_export_request.request_completed.connect(_on_export_request_completed)
+	call_deferred("_start_packaged_backend_if_available")
 
 
 func validate_interaction(payload: Dictionary) -> void:
 	var headers := PackedStringArray(["Content-Type: application/json"])
-	var body := JSON.stringify(payload)
+	var body := JSON.stringify(_payload_with_ai_settings(payload))
 	_pending_request_kind = "validate"
 	var error := _http_request.request(DEFAULT_URL, headers, HTTPClient.METHOD_POST, body)
 	if error != OK:
@@ -63,7 +66,7 @@ func validate_combat(payload: Dictionary) -> void:
 
 func request_hints(payload: Dictionary) -> void:
 	var headers := PackedStringArray(["Content-Type: application/json"])
-	var body := JSON.stringify(payload)
+	var body := JSON.stringify(_payload_with_ai_settings(payload))
 	_pending_request_kind = "hints"
 	var error := _http_request.request(HINTS_URL, headers, HTTPClient.METHOD_POST, body)
 	if error != OK:
@@ -72,10 +75,47 @@ func request_hints(payload: Dictionary) -> void:
 
 func request_task(payload: Dictionary) -> void:
 	var headers := PackedStringArray(["Content-Type: application/json"])
-	var body := JSON.stringify(payload)
+	var body := JSON.stringify(_payload_with_ai_settings(payload))
 	var error := _task_request.request(TASKS_URL, headers, HTTPClient.METHOD_POST, body)
 	if error != OK:
 		request_failed.emit("Unable to fetch a generated task from backend.")
+
+
+func _payload_with_ai_settings(payload: Dictionary) -> Dictionary:
+	var request_payload := payload.duplicate(true)
+	var generation_mode := GameState.get_generation_mode()
+	request_payload["generation_mode"] = generation_mode
+	if generation_mode == "ai":
+		var api_key := GameState.get_hf_api_key().strip_edges()
+		if not api_key.is_empty():
+			request_payload["llm_api_key"] = api_key
+	return request_payload
+
+
+func _start_packaged_backend_if_available() -> void:
+	if _backend_autostart_attempted or OS.get_name() != "Windows":
+		return
+	_backend_autostart_attempted = true
+
+	var release_dir := OS.get_executable_path().get_base_dir()
+	var backend_dir := release_dir.path_join("backend")
+	var starter_script := release_dir.path_join("start_backend.ps1")
+	if not DirAccess.dir_exists_absolute(backend_dir) or not FileAccess.file_exists(starter_script):
+		return
+
+	OS.create_process(
+		"powershell.exe",
+		PackedStringArray([
+			"-NoProfile",
+			"-ExecutionPolicy",
+			"Bypass",
+			"-WindowStyle",
+			"Hidden",
+			"-File",
+			starter_script
+		]),
+		false
+	)
 
 
 func send_log_event(payload: Dictionary) -> void:
@@ -105,10 +145,12 @@ func export_logs_to_downloads() -> void:
 		downloads_dir = OS.get_user_data_dir()
 	var timestamp := Time.get_datetime_string_from_system(false, true).replace(":", "-").replace(" ", "_")
 	_pending_export_path = downloads_dir.path_join("Skill-Issue-player-logs-%s.xlsx" % timestamp)
-	_export_request.download_file = _pending_export_path
+	_pending_export_temp_path = "user://Skill-Issue-player-logs-%s.xlsx" % timestamp
+	_export_request.download_file = _pending_export_temp_path
 	var error := _export_request.request(LOG_EXPORT_URL, PackedStringArray(), HTTPClient.METHOD_GET)
 	if error != OK:
 		_export_request.download_file = ""
+		_pending_export_temp_path = ""
 		logs_export_failed.emit("Unable to request Excel log export.")
 
 
@@ -148,7 +190,23 @@ func _on_export_request_completed(result: int, response_code: int, _headers: Pac
 	if result != HTTPRequest.RESULT_SUCCESS or response_code >= 400:
 		logs_export_failed.emit("Log export failed with code %s." % response_code)
 		return
-	if _pending_export_path.is_empty() or not FileAccess.file_exists(_pending_export_path):
+	if _pending_export_temp_path.is_empty() or not FileAccess.file_exists(_pending_export_temp_path):
 		logs_export_failed.emit("Log export finished, but the Excel file was not saved.")
 		return
+	if not _copy_file(_pending_export_temp_path, _pending_export_path):
+		var fallback_path := ProjectSettings.globalize_path(_pending_export_temp_path)
+		logs_export_received.emit(fallback_path)
+		return
 	logs_export_received.emit(_pending_export_path)
+
+
+func _copy_file(source_path: String, target_path: String) -> bool:
+	var source := FileAccess.open(source_path, FileAccess.READ)
+	if source == null:
+		return false
+	var bytes := source.get_buffer(source.get_length())
+	var target := FileAccess.open(target_path, FileAccess.WRITE)
+	if target == null:
+		return false
+	target.store_buffer(bytes)
+	return true

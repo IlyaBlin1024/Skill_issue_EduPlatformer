@@ -22,7 +22,8 @@ var settings: Dictionary = {
 	"volume": 0.85,
 	"generation_mode": "ai",
 	"difficulty": "normal",
-	"hf_api_key": ""
+	"hf_api_key": "",
+	"admin_mode": false
 }
 
 var save_slots: Array[Dictionary] = []
@@ -252,6 +253,16 @@ func get_progress_percent() -> int:
 	return int(round(float(completed) / 11.0 * 100.0))
 
 
+func get_current_stage() -> Dictionary:
+	var slot := _active_save()
+	var stage: Dictionary = slot.get("current_stage", {"type": pending_stage_type, "level_id": pending_level_id})
+	if String(stage.get("type", "")).is_empty() and not pending_stage_type.is_empty():
+		stage["type"] = pending_stage_type
+	if String(stage.get("level_id", "")).is_empty() and not pending_level_id.is_empty():
+		stage["level_id"] = pending_level_id
+	return stage.duplicate(true)
+
+
 func get_inventory_items() -> Array:
 	var slot := _active_save()
 	var items: Array = slot.get("inventory", [])
@@ -299,6 +310,16 @@ func set_hf_api_key(api_key: String) -> void:
 	_write_settings()
 
 
+func set_admin_mode(enabled: bool) -> void:
+	settings["admin_mode"] = enabled
+	log_event("settings_admin_mode_changed", {"enabled": enabled})
+	_write_settings()
+
+
+func is_admin_mode_enabled() -> bool:
+	return bool(settings.get("admin_mode", false))
+
+
 func get_generation_mode() -> String:
 	return String(settings.get("generation_mode", "ai"))
 
@@ -309,6 +330,20 @@ func get_initial_difficulty() -> String:
 
 func get_hf_api_key() -> String:
 	return String(settings.get("hf_api_key", ""))
+
+
+func export_local_logs_to_downloads() -> String:
+	var downloads_dir := OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+	if downloads_dir.is_empty():
+		downloads_dir = OS.get_user_data_dir()
+	var timestamp := Time.get_datetime_string_from_system(false, true).replace(":", "-").replace(" ", "_")
+	var export_path := downloads_dir.path_join("Skill-Issue-local-logs-%s.csv" % timestamp)
+	var file := FileAccess.open(export_path, FileAccess.WRITE)
+	if file == null:
+		return ""
+	file.store_line("kind,timestamp,event_type,stage_type,level_id,progress_percent,details")
+	_write_local_log_rows(file)
+	return export_path
 
 
 func apply_settings() -> void:
@@ -323,11 +358,47 @@ func reset_settings() -> void:
 		"volume": 0.85,
 		"generation_mode": "ai",
 		"difficulty": "normal",
-		"hf_api_key": ""
+		"hf_api_key": "",
+		"admin_mode": false
 	}
 	log_event("settings_reset")
 	apply_settings()
 	_write_settings()
+
+
+func admin_unlock_all_progress() -> void:
+	var slot := _active_save()
+	slot["empty"] = false
+	slot["tutorial_completed"] = true
+	var levels := {}
+	var bosses := {}
+	for level_variant in LEVELS:
+		var level_data: Dictionary = level_variant
+		var level_id := String(level_data.get("id", ""))
+		levels[level_id] = true
+		bosses[level_id] = true
+	slot["levels_completed"] = levels
+	slot["bosses_completed"] = bosses
+	slot["current_stage"] = {"type": "complete", "level_id": "level_05"}
+	_touch_slot(slot)
+	_write_saves()
+	log_event("admin_unlock_all_progress")
+
+
+func admin_complete_tutorial() -> void:
+	var slot := _active_save()
+	slot["empty"] = false
+	slot["tutorial_completed"] = true
+	slot["current_stage"] = {"type": "level", "level_id": "level_01"}
+	_touch_slot(slot)
+	_write_saves()
+	log_event("admin_complete_tutorial")
+
+
+func admin_reset_active_save() -> void:
+	save_slots[active_save_slot] = _empty_save_slot(active_save_slot)
+	_write_saves()
+	log_event("admin_reset_active_save", {"slot": active_save_slot})
 
 
 func log_event(event_type: String, metadata: Dictionary = {}) -> void:
@@ -348,9 +419,10 @@ func log_event(event_type: String, metadata: Dictionary = {}) -> void:
 		"metadata": metadata,
 	}
 	_write_local_analytics(record)
-	var api_client := get_node_or_null("/root/CodeApiClient")
-	if api_client != null and api_client.has_method("send_log_event"):
-		api_client.call("send_log_event", record)
+	if is_inside_tree():
+		var api_client := get_node_or_null("/root/CodeApiClient")
+		if api_client != null and api_client.has_method("send_log_event"):
+			api_client.call("send_log_event", record)
 
 
 func _load_settings() -> void:
@@ -444,6 +516,67 @@ func _write_local_analytics(record: Dictionary) -> void:
 		return
 	file.seek_end()
 	file.store_line(JSON.stringify(record))
+
+
+func _write_local_log_rows(file: FileAccess) -> void:
+	var wrote_any := false
+	if FileAccess.file_exists(ANALYTICS_FILE):
+		var analytics := FileAccess.open(ANALYTICS_FILE, FileAccess.READ)
+		if analytics != null:
+			while not analytics.eof_reached():
+				var line := analytics.get_line()
+				if line.strip_edges().is_empty():
+					continue
+				var parsed: Variant = JSON.parse_string(line)
+				if typeof(parsed) != TYPE_DICTIONARY:
+					continue
+				var record: Dictionary = parsed
+				var timestamp_value := int(record.get("timestamp_unix", 0))
+				var timestamp_text := ""
+				if timestamp_value > 0:
+					timestamp_text = Time.get_datetime_string_from_unix_time(timestamp_value, true)
+				_write_csv_line(file, [
+					"event",
+					timestamp_text,
+					String(record.get("event_type", "")),
+					String(record.get("stage_type", "")),
+					String(record.get("level_id", "")),
+					str(int(record.get("progress_percent", 0))),
+					JSON.stringify(record.get("metadata", {})),
+				])
+				wrote_any = true
+	var slot := _active_save()
+	var current_stage: Dictionary = slot.get("current_stage", {})
+	_write_csv_line(file, [
+		"save",
+		Time.get_datetime_string_from_system(true, true),
+		"active_save_snapshot",
+		String(current_stage.get("type", "")),
+		String(current_stage.get("level_id", "")),
+		str(int(slot.get("progress_percent", 0))),
+		JSON.stringify(slot),
+	])
+	if not wrote_any:
+		_write_csv_line(file, [
+			"note",
+			Time.get_datetime_string_from_system(true, true),
+			"no_local_events_yet",
+			"",
+			"",
+			"0",
+			"No local analytics events were recorded yet.",
+		])
+
+
+func _write_csv_line(file: FileAccess, cells: Array) -> void:
+	var escaped_cells := PackedStringArray()
+	for cell in cells:
+		escaped_cells.append(_csv_cell(String(cell)))
+	file.store_line(",".join(escaped_cells))
+
+
+func _csv_cell(value: String) -> String:
+	return "\"%s\"" % value.replace("\"", "\"\"")
 
 
 func _new_save_slot(slot_index: int, empty: bool) -> Dictionary:

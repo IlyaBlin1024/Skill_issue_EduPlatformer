@@ -5,6 +5,7 @@ signal overlay_step_finished
 
 const NEXT_SCENE_PATH := "res://scenes/main_menu.tscn"
 const PROJECTILE_SCRIPT := preload("res://scripts/enemy_projectile.gd")
+const TUTORIAL_ART_ROOT := "res://assets/production_art/levels/tutorial"
 
 const ROOM_WIDTH := 1280.0
 const ROOM_COUNT := 5
@@ -17,8 +18,8 @@ const TUTORIAL_RANGED_DAMAGE := 140
 const TUTORIAL_MELEE_RANGE := 210.0
 const TUTORIAL_MELEE_PREFERRED_RANGE := 110.0
 const TUTORIAL_RANGED_PREFERRED_RANGE := 250.0
-const ROOM_FADE_OUT_DURATION := 0.35
-const ROOM_FADE_IN_DURATION := 0.35
+const ROOM_FADE_OUT_DURATION := 0.5
+const ROOM_FADE_IN_DURATION := 0.5
 @onready var backdrop: ColorRect = $Backdrop
 @onready var world: Node2D = $World
 @onready var player: PlayerController = $Player
@@ -44,6 +45,10 @@ var _ranged_defeated := false
 var _altar_complete := false
 var _chest_complete := false
 var _overlay_advance_requested := false
+var _tutorial_background_texture: Texture2D = null
+var _tutorial_ground_texture: Texture2D = null
+var _tutorial_wall_texture: Texture2D = null
+var _tutorial_platform_texture: Texture2D = null
 
 
 func _ready() -> void:
@@ -73,11 +78,14 @@ func _input(event: InputEvent) -> void:
 
 
 func _build_world() -> void:
+	_load_tutorial_art()
 	backdrop.offset_left = 0.0
 	backdrop.offset_top = 0.0
 	backdrop.offset_right = ROOM_WIDTH * ROOM_COUNT
 	backdrop.offset_bottom = 720.0
 	backdrop.color = Color(0.19, 0.2, 0.28, 1.0)
+	if _tutorial_background_texture != null:
+		_set_texture_overlay(backdrop, _tutorial_background_texture, false)
 	for room_index in range(ROOM_COUNT):
 		_build_room_shell(room_index)
 	_build_terminal_room()
@@ -94,6 +102,8 @@ func _build_room_shell(room_index: int) -> void:
 	room_back.size = Vector2(ROOM_WIDTH, 720.0)
 	room_back.color = Color(0.21 + room_index * 0.015, 0.22, 0.31 + room_index * 0.01, 1.0)
 	world.add_child(room_back)
+	if _tutorial_background_texture != null:
+		_set_texture_overlay(room_back, _tutorial_background_texture, false)
 	_add_floor(room_start)
 	_add_wall(room_start + ROOM_WIDTH - 8.0)
 	var header := Label.new()
@@ -189,7 +199,7 @@ func _configure_fade_layer() -> void:
 
 func _run_tutorial() -> void:
 	_move_to_room(0, true)
-	await _fade_from_black(0.8)
+	await _fade_from_black(0.5)
 	await _run_terminal_room()
 	await _transition_to_room(1, true)
 	await _run_melee_room_sequence()
@@ -199,7 +209,7 @@ func _run_tutorial() -> void:
 	await _run_chest_room_sequence()
 	await _transition_to_room(4, true)
 	await _run_altar_room_sequence()
-	await _fade_to_black(0.9)
+	await _fade_to_black(0.5)
 	GameState.mark_tutorial_completed()
 	get_tree().change_scene_to_file(NEXT_SCENE_PATH)
 
@@ -771,8 +781,10 @@ func _add_floor(room_start: float) -> void:
 	var visual := ColorRect.new()
 	visual.position = Vector2(-ROOM_WIDTH * 0.5, -FLOOR_HEIGHT * 0.5)
 	visual.size = Vector2(ROOM_WIDTH, FLOOR_HEIGHT)
-	visual.color = Color(0.28, 0.25, 0.39, 1.0)
+	visual.color = Color(0.28, 0.25, 0.39, 0.0)
 	floor_body.add_child(visual)
+	if _tutorial_ground_texture != null:
+		_set_texture_overlay(visual, _tutorial_ground_texture, true)
 	world.add_child(floor_body)
 
 
@@ -788,8 +800,10 @@ func _add_wall(x_position: float) -> void:
 	var visual := ColorRect.new()
 	visual.position = Vector2(-8.0, -310.0)
 	visual.size = Vector2(16.0, 620.0)
-	visual.color = Color(0.22, 0.2, 0.32, 1.0)
+	visual.color = Color(0.22, 0.2, 0.32, 0.0)
 	wall.add_child(visual)
+	if _tutorial_wall_texture != null:
+		_set_texture_overlay(visual, _tutorial_wall_texture, true)
 	world.add_child(wall)
 
 
@@ -799,17 +813,54 @@ func _add_one_way_platform(x_position: float, y_position: float, width: float) -
 	platform.position = Vector2(x_position, y_position)
 	var collision := CollisionShape2D.new()
 	var shape := RectangleShape2D.new()
-	shape.size = Vector2(width, 16.0)
+	shape.size = Vector2(width, 10.0)
+	collision.position = Vector2(0.0, -3.0)
 	collision.shape = shape
 	collision.one_way_collision = true
-	collision.one_way_collision_margin = 8.0
+	collision.one_way_collision_margin = 2.0
 	platform.add_child(collision)
 	var visual := ColorRect.new()
 	visual.position = Vector2(-width * 0.5, -8.0)
 	visual.size = Vector2(width, 16.0)
-	visual.color = Color(0.42, 0.32, 0.53, 1.0)
+	visual.color = Color(0.42, 0.32, 0.53, 0.0)
 	platform.add_child(visual)
+	if _tutorial_platform_texture != null:
+		_set_texture_overlay(visual, _tutorial_platform_texture, true)
 	world.add_child(platform)
+
+
+func _load_tutorial_art() -> void:
+	_tutorial_background_texture = _load_texture("%s/backgrounds/background.png" % TUTORIAL_ART_ROOT)
+	_tutorial_ground_texture = _load_texture("%s/tilesets/tileset_ground.png" % TUTORIAL_ART_ROOT)
+	_tutorial_wall_texture = _load_texture("%s/tilesets/tileset_walls.png" % TUTORIAL_ART_ROOT)
+	_tutorial_platform_texture = _load_texture("%s/platforms/platform_one_way.png" % TUTORIAL_ART_ROOT)
+
+
+func _load_texture(path: String) -> Texture2D:
+	if not ResourceLoader.exists(path):
+		return null
+	return ResourceLoader.load(path) as Texture2D
+
+
+func _set_texture_overlay(control: Control, texture: Texture2D, tile: bool) -> void:
+	if texture == null:
+		return
+	control.clip_contents = true
+	if control is ColorRect:
+		var color_rect := control as ColorRect
+		color_rect.color = Color(color_rect.color.r, color_rect.color.g, color_rect.color.b, 0.0)
+	var texture_rect := control.get_node_or_null("ProductionTexture") as TextureRect
+	if texture_rect == null:
+		texture_rect = TextureRect.new()
+		texture_rect.name = "ProductionTexture"
+		texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		control.add_child(texture_rect)
+	texture_rect.texture = texture
+	texture_rect.position = Vector2.ZERO
+	texture_rect.size = control.size
+	texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	texture_rect.stretch_mode = TextureRect.STRETCH_TILE if tile else TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	texture_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 
 func _create_enemy(spawn_position: Vector2, config: Dictionary) -> EnemyEncounter:
@@ -817,32 +868,38 @@ func _create_enemy(spawn_position: Vector2, config: Dictionary) -> EnemyEncounte
 	enemy.position = spawn_position
 	var collision := CollisionShape2D.new()
 	var shape := RectangleShape2D.new()
-	shape.size = Vector2(28.0, 48.0)
+	shape.size = Vector2(42.0, 72.0)
+	collision.position = Vector2(0.0, -12.0)
 	collision.shape = shape
 	collision.name = "CollisionShape2D"
 	enemy.add_child(collision)
 	var visual := ColorRect.new()
 	visual.name = "Visual"
-	visual.offset_left = -14.0
-	visual.offset_top = -24.0
-	visual.offset_right = 14.0
+	visual.offset_left = -21.0
+	visual.offset_top = -48.0
+	visual.offset_right = 21.0
 	visual.offset_bottom = 24.0
+	visual.visible = false
+	visual.color = Color(0, 0, 0, 0)
+	visual.modulate = Color(1, 1, 1, 0)
+	visual.self_modulate = Color(1, 1, 1, 0)
+	visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	enemy.add_child(visual)
 	var hp_label := Label.new()
 	hp_label.name = "HpLabel"
-	hp_label.offset_left = -34.0
-	hp_label.offset_top = -64.0
-	hp_label.offset_right = 36.0
-	hp_label.offset_bottom = -36.0
+	hp_label.offset_left = -42.0
+	hp_label.offset_top = -92.0
+	hp_label.offset_right = 44.0
+	hp_label.offset_bottom = -66.0
 	hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	enemy.add_child(hp_label)
 	var state_label := Label.new()
 	state_label.name = "StateLabel"
 	state_label.visible = false
-	state_label.offset_left = -54.0
-	state_label.offset_top = -88.0
-	state_label.offset_right = 58.0
-	state_label.offset_bottom = -66.0
+	state_label.offset_left = -58.0
+	state_label.offset_top = -118.0
+	state_label.offset_right = 60.0
+	state_label.offset_bottom = -94.0
 	state_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	enemy.add_child(state_label)
 	world.add_child(enemy)
@@ -856,6 +913,7 @@ func _create_chest(spawn_position: Vector2) -> ChestEncounter:
 	var collision := CollisionShape2D.new()
 	var shape := RectangleShape2D.new()
 	shape.size = Vector2(72.0, 54.0)
+	collision.position = Vector2(0.0, -7.0)
 	collision.shape = shape
 	collision.name = "CollisionShape2D"
 	chest.add_child(collision)
@@ -865,9 +923,15 @@ func _create_chest(spawn_position: Vector2) -> ChestEncounter:
 	visual.offset_top = -24.0
 	visual.offset_right = 28.0
 	visual.offset_bottom = 20.0
+	visual.visible = false
+	visual.color = Color(0, 0, 0, 0)
+	visual.modulate = Color(1, 1, 1, 0)
+	visual.self_modulate = Color(1, 1, 1, 0)
+	visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	chest.add_child(visual)
 	var label := Label.new()
 	label.name = "Label"
+	label.visible = false
 	label.offset_left = -36.0
 	label.offset_top = -58.0
 	label.offset_right = 38.0
@@ -884,6 +948,7 @@ func _create_altar(spawn_position: Vector2) -> AltarEncounter:
 	var collision := CollisionShape2D.new()
 	var shape := RectangleShape2D.new()
 	shape.size = Vector2(84.0, 56.0)
+	collision.position = Vector2(0.0, -6.0)
 	collision.shape = shape
 	collision.name = "CollisionShape2D"
 	altar.add_child(collision)
@@ -893,9 +958,15 @@ func _create_altar(spawn_position: Vector2) -> AltarEncounter:
 	visual.offset_top = -26.0
 	visual.offset_right = 34.0
 	visual.offset_bottom = 22.0
+	visual.visible = false
+	visual.color = Color(0, 0, 0, 0)
+	visual.modulate = Color(1, 1, 1, 0)
+	visual.self_modulate = Color(1, 1, 1, 0)
+	visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	altar.add_child(visual)
 	var label := Label.new()
 	label.name = "Label"
+	label.visible = false
 	label.offset_left = -42.0
 	label.offset_top = -58.0
 	label.offset_right = 44.0

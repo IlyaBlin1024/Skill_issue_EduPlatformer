@@ -1,12 +1,22 @@
 extends CanvasLayer
 
+const MENU_ASSET_ROOT := "res://assets/generated_menu/"
+const BUTTON_SMALL_IDLE := MENU_ASSET_ROOT + "buttons/button_small_idle.png"
+const BUTTON_SMALL_SELECTED := MENU_ASSET_ROOT + "buttons/button_small_selected.png"
+const INVENTORY_SLOT_IDLE := MENU_ASSET_ROOT + "cards/inventory_slot_idle.png"
+const INVENTORY_SLOT_SELECTED := MENU_ASSET_ROOT + "cards/inventory_slot_selected.png"
+const PANEL_SETTINGS := MENU_ASSET_ROOT + "cards/panel_settings.png"
+
 var _selected_index := 0
 var _description_label: RichTextLabel
+var _menu_font: Font
+var _texture_cache: Dictionary = {}
 
 
 func _ready() -> void:
 	layer = 185
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_load_menu_font()
 	_build()
 	visible = false
 
@@ -42,7 +52,7 @@ func _build() -> void:
 	title.anchor_right = 0.75
 	title.anchor_bottom = 0.16
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 58)
+	_apply_menu_font(title, 44)
 	title.add_theme_color_override("font_color", Color(1.0, 0.76, 0.25))
 	add_child(title)
 
@@ -57,10 +67,10 @@ func _build() -> void:
 	grid.columns = 4
 	grid.anchor_left = 0.17
 	grid.anchor_top = 0.22
-	grid.anchor_right = 0.68
+	grid.anchor_right = 0.69
 	grid.anchor_bottom = 0.72
-	grid.add_theme_constant_override("h_separation", 14)
-	grid.add_theme_constant_override("v_separation", 14)
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 12)
 	add_child(grid)
 
 	var items := GameState.get_inventory_items()
@@ -86,7 +96,7 @@ func _build() -> void:
 	_description_label = RichTextLabel.new()
 	_description_label.bbcode_enabled = true
 	_description_label.fit_content = true
-	_description_label.add_theme_font_size_override("normal_font_size", 23)
+	_apply_menu_font(_description_label, 18, true)
 	_description_label.add_theme_color_override("default_color", Color(1.0, 0.88, 0.5))
 	panel.add_child(_description_label)
 
@@ -110,7 +120,8 @@ func _refresh_description() -> void:
 func _button(text: String, action: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
-	button.add_theme_font_size_override("font_size", 24)
+	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_apply_menu_font(button, 18)
 	button.add_theme_color_override("font_color", Color(1.0, 0.86, 0.42))
 	button.add_theme_stylebox_override("normal", _button_style(false))
 	button.add_theme_stylebox_override("hover", _button_style(true))
@@ -124,15 +135,19 @@ func _slot_button(text: String, locked: bool) -> Button:
 		button.text = "Empty"
 	else:
 		button.text = "Hint\n%s" % text
-	button.custom_minimum_size = Vector2(145, 150)
-	button.add_theme_font_size_override("font_size", 22)
+	button.custom_minimum_size = Vector2(130, 135)
+	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_apply_menu_font(button, 16)
 	button.add_theme_color_override("font_color", Color(1.0, 0.86, 0.42))
-	button.add_theme_stylebox_override("normal", _button_style(false))
-	button.add_theme_stylebox_override("hover", _button_style(true))
+	button.add_theme_stylebox_override("normal", _panel_style(INVENTORY_SLOT_IDLE))
+	button.add_theme_stylebox_override("hover", _panel_style(INVENTORY_SLOT_SELECTED))
 	return button
 
 
-func _button_style(active: bool) -> StyleBoxFlat:
+func _button_style(active: bool) -> StyleBox:
+	var textured := _texture_style(BUTTON_SMALL_SELECTED if active else BUTTON_SMALL_IDLE, 16)
+	if textured != null:
+		return textured
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.03, 0.04, 0.09, 0.94) if not active else Color(0.04, 0.18, 0.36, 0.96)
 	style.border_color = Color(1.0, 0.52, 0.1) if not active else Color(0.2, 0.78, 1.0)
@@ -144,7 +159,13 @@ func _button_style(active: bool) -> StyleBoxFlat:
 	return style
 
 
-func _panel_style() -> StyleBoxFlat:
+func _panel_style(texture_path: String = PANEL_SETTINGS) -> StyleBox:
+	var textured_margin := 24
+	if texture_path == INVENTORY_SLOT_IDLE or texture_path == INVENTORY_SLOT_SELECTED:
+		textured_margin = 18
+	var textured := _texture_style(texture_path, textured_margin)
+	if textured != null:
+		return textured
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.025, 0.025, 0.05, 0.92)
 	style.border_color = Color(0.95, 0.48, 0.1)
@@ -153,8 +174,50 @@ func _panel_style() -> StyleBoxFlat:
 	style.corner_radius_top_right = 10
 	style.corner_radius_bottom_left = 10
 	style.corner_radius_bottom_right = 10
-	style.content_margin_left = 18
-	style.content_margin_right = 18
-	style.content_margin_top = 14
-	style.content_margin_bottom = 14
+	style.content_margin_left = 14
+	style.content_margin_right = 14
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
 	return style
+
+
+func _menu_texture(path: String) -> Texture2D:
+	if _texture_cache.has(path):
+		return _texture_cache[path]
+	var texture: Texture2D = null
+	if ResourceLoader.exists(path):
+		texture = load(path) as Texture2D
+	_texture_cache[path] = texture
+	return texture
+
+
+func _texture_style(path: String, margin: int) -> StyleBoxTexture:
+	var texture := _menu_texture(path)
+	if texture == null:
+		return null
+	var style := StyleBoxTexture.new()
+	style.texture = texture
+	style.texture_margin_left = margin
+	style.texture_margin_top = margin
+	style.texture_margin_right = margin
+	style.texture_margin_bottom = margin
+	style.content_margin_left = 14
+	style.content_margin_right = 14
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
+	return style
+
+
+func _load_menu_font() -> void:
+	_menu_font = null
+
+
+func _apply_menu_font(control: Control, size: int, rich_text: bool = false) -> void:
+	if rich_text:
+		control.add_theme_font_size_override("normal_font_size", size)
+		if _menu_font != null:
+			control.add_theme_font_override("normal_font", _menu_font)
+		return
+	control.add_theme_font_size_override("font_size", size)
+	if _menu_font != null:
+		control.add_theme_font_override("font", _menu_font)

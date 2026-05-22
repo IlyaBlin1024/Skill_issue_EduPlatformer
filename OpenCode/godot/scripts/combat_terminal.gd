@@ -43,6 +43,16 @@ var _interaction_type := "combat"
 var _active_language := "python"
 var _help_panel_open := false
 var _timer_paused_by_help := false
+var _hint_request_count := 0
+var _explanation_open_count := 0
+var _terminal_session_id := ""
+var _terminal_open_tick_msec := 0
+var _task_generation_start_tick_msec := 0
+var _task_generation_seconds := 0.0
+var _explanation_open_tick_msec := 0
+var _explanation_read_seconds := 0.0
+var _run_count := 0
+var _terminal_success := false
 
 const MAX_TASK_GENERATION_RETRIES := 2
 const HIGHLIGHT_ALIASES := {
@@ -79,7 +89,6 @@ func _ready() -> void:
 func open_terminal(payload: Dictionary) -> void:
 	_active_payload = payload.duplicate(true)
 	_interaction_type = String(payload.get("interaction_type", "combat"))
-	GameState.log_event("terminal_opened", _terminal_log_metadata())
 	_timer_enabled = bool(payload.get("timer_enabled", true))
 	_time_left = float(payload.get("time_limit", 180))
 	_request_in_flight = false
@@ -87,6 +96,17 @@ func open_terminal(payload: Dictionary) -> void:
 	_task_request_in_flight = false
 	_task_ready = false
 	_task_generation_attempts = 0
+	_hint_request_count = 0
+	_explanation_open_count = 0
+	_terminal_session_id = "%d_%d" % [Time.get_ticks_msec(), randi()]
+	_terminal_open_tick_msec = Time.get_ticks_msec()
+	_task_generation_start_tick_msec = 0
+	_task_generation_seconds = 0.0
+	_explanation_open_tick_msec = 0
+	_explanation_read_seconds = 0.0
+	_run_count = 0
+	_terminal_success = false
+	GameState.log_event("terminal_opened", _terminal_log_metadata())
 	_active_language = "python"
 	_help_panel_open = false
 	_timer_paused_by_help = false
@@ -142,6 +162,7 @@ func _process(delta: float) -> void:
 	timer_label.text = "Time: %d" % int(ceil(_time_left))
 	if _time_left <= 0.0:
 		_set_rich_text(status_label, "Time is up. The enemy strikes first.")
+		GameState.log_event("terminal_time_expired", _terminal_log_metadata({"run_count": _run_count}))
 		interaction_resolved.emit(
 			false,
 			{
@@ -164,6 +185,8 @@ func _on_run_pressed() -> void:
 		_set_rich_text(status_label, "Task is still loading...")
 		return
 
+	_capture_explanation_read_time()
+	_run_count += 1
 	GameState.log_event("code_run_requested", _terminal_log_metadata({"code_length": code_editor.text.length()}))
 	_request_in_flight = true
 	run_button.disabled = true
@@ -175,9 +198,12 @@ func _on_run_pressed() -> void:
 		_resolve_tutorial_submission(tutorial_expected_code)
 		return
 
+	var stage: Dictionary = GameState.get_current_stage()
 	var payload := {
 		"user_id": "anon_local",
 		"interaction_type": _interaction_type,
+		"stage_type": String(stage.get("type", "")),
+		"level_id": String(stage.get("level_id", "")),
 		"level_theme": _active_payload.get("level_theme", "variables"),
 		"difficulty": _active_payload.get("difficulty", "easy"),
 		"language": _active_language,
@@ -191,6 +217,17 @@ func _on_run_pressed() -> void:
 		"syntax_rules": _active_payload.get("syntax_rules", []),
 		"fallback_hints": _active_payload.get("fallback_hints", []),
 		"validation_targets": _active_payload.get("validation_targets", []),
+		"generation_source": _active_payload.get("generation_source", ""),
+		"generation_detail": _active_payload.get("generation_detail", ""),
+		"pattern_id": _active_payload.get("pattern_id", ""),
+		"terminal_session_id": _terminal_session_id,
+		"attempt_number": _run_count,
+		"task_generation_seconds": _task_generation_seconds,
+		"hint_used": _hint_request_count > 0,
+		"explanation_used": _explanation_open_count > 0,
+		"hint_request_count": _hint_request_count,
+		"explanation_open_count": _explanation_open_count,
+		"explanation_read_seconds": _explanation_read_seconds,
 		"code": code_editor.text,
 		"example_code": _active_payload.get("example_code", ""),
 		"time_taken_seconds": int(_active_payload.get("time_limit", 180) - _time_left),
@@ -204,6 +241,7 @@ func _on_hint_pressed() -> void:
 	if _task_request_in_flight:
 		_set_rich_text(status_label, "Task is still loading...")
 		return
+	_hint_request_count += 1
 	GameState.log_event("hint_requested", _terminal_log_metadata())
 	_hint_request_in_flight = true
 	hint_button.disabled = true
@@ -247,7 +285,9 @@ func _on_hint_pressed() -> void:
 
 
 func _on_close_pressed() -> void:
-	GameState.log_event("terminal_closed", _terminal_log_metadata())
+	_capture_explanation_read_time()
+	var close_event := "terminal_closed" if _terminal_success else "terminal_closed_without_success"
+	GameState.log_event(close_event, _terminal_log_metadata({"run_count": _run_count}))
 	_set_rich_text(status_label, "Encounter closed.")
 	hide_terminal()
 	terminal_closed.emit()
@@ -259,7 +299,8 @@ func _on_combat_result_received(result: Dictionary) -> void:
 	explanation_button.disabled = false
 
 	if result.get("success", false):
-		GameState.log_event("code_validation_succeeded", _terminal_log_metadata({"attempt_id": String(result.get("attempt_id", ""))}))
+		_terminal_success = true
+		GameState.log_event("code_validation_succeeded", _terminal_log_metadata({"attempt_id": String(result.get("attempt_id", "")), "attempt_number": _run_count}))
 		code_editor.editable = false
 		run_button.disabled = true
 		close_button.disabled = true
@@ -275,7 +316,7 @@ func _on_combat_result_received(result: Dictionary) -> void:
 		return
 
 	var errors := PackedStringArray(result.get("errors", []))
-	GameState.log_event("code_validation_failed", _terminal_log_metadata({"errors": result.get("errors", []), "attempt_id": String(result.get("attempt_id", ""))}))
+	GameState.log_event("code_validation_failed", _terminal_log_metadata({"errors": result.get("errors", []), "attempt_id": String(result.get("attempt_id", "")), "attempt_number": _run_count}))
 	_set_rich_text(status_label, "%s: %s" % [String(_active_payload.get("failure_text", "Failed")), ", ".join(errors)])
 	_show_hints(result.get("hints", []))
 	if _interaction_type == "chest" or _interaction_type == "altar":
@@ -310,6 +351,8 @@ func _on_hint_result_received(result: Dictionary) -> void:
 func _on_task_result_received(result: Dictionary) -> void:
 	_task_request_in_flight = false
 	_task_ready = true
+	if _task_generation_start_tick_msec > 0:
+		_task_generation_seconds = float(Time.get_ticks_msec() - _task_generation_start_tick_msec) / 1000.0
 	if not panel.visible:
 		return
 	if String(result.get("interaction_type", "")) != _interaction_type:
@@ -317,6 +360,7 @@ func _on_task_result_received(result: Dictionary) -> void:
 	GameState.log_event("task_loaded", _terminal_log_metadata({
 		"source": String(result.get("generation_source", "")),
 		"pattern_id": String(result.get("pattern_id", "")),
+		"task_generation_seconds": _task_generation_seconds,
 	}))
 	var generated_title: String = String(result.get("title", "")).strip_edges()
 	var generated_prompt: String = String(result.get("prompt", "")).strip_edges()
@@ -346,6 +390,8 @@ func _on_task_result_received(result: Dictionary) -> void:
 	_active_payload["difficulty"] = difficulty_text
 	_active_payload["generated_prompt"] = generated_prompt
 	_active_payload["gameplay_effect"] = gameplay_effect
+	_active_payload["generation_source"] = generation_source
+	_active_payload["generation_detail"] = generation_detail
 	_active_payload["syntax_rules"] = syntax_rules
 	_active_payload["explanation_title"] = String(result.get("explanation_title", "")).strip_edges()
 	_active_payload["explanation_body"] = String(result.get("explanation_body", "")).strip_edges()
@@ -399,12 +445,8 @@ func _on_request_failed(message: String) -> void:
 			_set_rich_text(status_label, "%s Retrying..." % message)
 			_request_generated_task()
 			return
-		_set_rich_text(status_label, "Task generation failed. Close and reopen the terminal to try again.")
-		source_label.text = "Source: generation failed"
-		run_button.disabled = true
-		hint_button.disabled = true
-		explanation_button.disabled = true
-		close_button.disabled = false
+		_set_rich_text(status_label, "Backend generation is unavailable. Loading a local pattern...")
+		call_deferred("_deliver_preset_task", _local_fallback_task(message))
 		return
 	run_button.disabled = _help_panel_open
 	hint_button.disabled = _help_panel_open
@@ -451,12 +493,14 @@ func _fallback_suggested_difficulty(current_difficulty: String) -> String:
 
 func _request_generated_task() -> void:
 	_task_generation_attempts += 1
+	_task_generation_start_tick_msec = Time.get_ticks_msec()
 	_task_request_in_flight = true
 	_task_ready = false
 	run_button.disabled = true
 	hint_button.disabled = true
 	explanation_button.disabled = true
 	_set_rich_text(status_label, "Generating task...")
+	GameState.log_event("task_generation_requested", _terminal_log_metadata({"attempt": _task_generation_attempts}))
 	var preset_task_variant: Variant = _active_payload.get("preset_task", null)
 	if typeof(preset_task_variant) == TYPE_DICTIONARY:
 		call_deferred("_deliver_preset_task", (preset_task_variant as Dictionary).duplicate(true))
@@ -526,15 +570,99 @@ func _deliver_preset_task(preset_task: Dictionary) -> void:
 	_on_task_result_received(result)
 
 
+func _local_fallback_task(detail: String) -> Dictionary:
+	var theme: String = String(_active_payload.get("level_theme", "variables"))
+	var encounter_name: String = String(_active_payload.get("encounter_name", "Training Target"))
+	var interaction_label: String = _interaction_type.capitalize()
+	var keywords: Array[String] = ["damage", "speed", "guard window"]
+	var validation_targets: Array[String] = ["damage", "speed", "guard_window"]
+	var prompt := "Assign clear values for damage, speed, and guard window so the knight is ready for %s." % encounter_name
+	var example_code := "damage = 12\nspeed = 4\nguard_window = 2"
+	var syntax_rules: Array[String] = ["Use assignments only.", "Keep one concept per line.", "Use readable variable names."]
+	var explanation_title := "Variables"
+	var explanation_body := "Variables store combat values. In this fallback task, each line should assign one useful gameplay stat."
+	var explanation_prompt := "Read the stat words in the task, then write one assignment for each requested stat."
+	var fallback_hints: Array[String] = [
+		"Write one line for damage, one for speed, and one for guard window.",
+		"Similar readable variable names are accepted if they clearly match the task.",
+	]
+	match theme:
+		"conditions":
+			keywords = ["if", "else", "enemy distance", "attack", "guard"]
+			validation_targets = ["if", "else", "enemy_distance", "attack", "guard"]
+			prompt = "Use if/else to choose attack when %s is open and guard otherwise." % encounter_name
+			example_code = "if enemy_open:\n    action = 'attack'\nelse:\n    action = 'guard'"
+			syntax_rules = ["Use one if/else branch.", "Put a useful action in each branch.", "Keep the branch short."]
+			explanation_title = "If / Else"
+			explanation_body = "Conditions choose between actions. The task asks you to connect a combat state to a safe response."
+			explanation_prompt = "Find the state clue and the two possible actions, then translate them into one branch."
+			fallback_hints = ["Start with if, then add else.", "Use readable action names connected to the task."]
+		"loops":
+			keywords = ["loop", "repeat", "range", "attack"]
+			validation_targets = ["loop", "range", "attack"]
+			prompt = "Write a short loop that repeats a safe attack pattern against %s." % encounter_name
+			example_code = "for _ in range(3):\n    attack()"
+			syntax_rules = ["Use one loop.", "Keep the loop body short.", "Make the repeat count clear."]
+			explanation_title = "Loops"
+			explanation_body = "Loops repeat one useful action with a clear stopping rule."
+			explanation_prompt = "Find the repeated action and the repeat count, then turn them into one loop."
+			fallback_hints = ["Use range for the repeat count.", "The body should contain one combat action."]
+		"functions":
+			keywords = ["def", "function", "call", "helper"]
+			validation_targets = ["def", "call", "helper"]
+			prompt = "Define and call one helper function for a safe response to %s." % encounter_name
+			example_code = "def safe_response():\n    guard()\n\nsafe_response()"
+			syntax_rules = ["Define one function with def.", "Call the function after defining it.", "Keep the helper focused."]
+			explanation_title = "Functions"
+			explanation_body = "Functions package a tactic into a reusable helper."
+			explanation_prompt = "Name the reusable action, define it, then call it once."
+			fallback_hints = ["Use def to define the helper.", "Do not forget to call the helper."]
+		"integration":
+			keywords = ["variable", "if", "loop", "tactic"]
+			validation_targets = ["assignment", "if", "loop"]
+			prompt = "Combine a stat setup with one tactical decision for %s." % encounter_name
+			example_code = "damage = 12\nif enemy_open:\n    attack()"
+			syntax_rules = ["Use at least two core constructs.", "Keep the snippet compact.", "Make each part support one tactic."]
+			explanation_title = "Integration"
+			explanation_body = "Integration combines earlier programming tools into one compact tactic."
+			explanation_prompt = "Find the stat clue and the decision clue, then combine them without extra code."
+			fallback_hints = ["Use one assignment first.", "Add one decision or repeated action that matches the task."]
+	return {
+		"interaction_type": _interaction_type,
+		"level_theme": theme,
+		"difficulty": String(_active_payload.get("difficulty", "easy")),
+		"language": "python",
+		"generation_source": "fallback",
+		"generation_detail": "Local pattern after backend error: %s" % detail,
+		"title": "%s: %s" % [interaction_label, encounter_name],
+		"prompt": prompt,
+		"gameplay_effect": "A correct local fallback snippet unlocks the current interaction.",
+		"syntax_rules": syntax_rules,
+		"explanation_title": explanation_title,
+		"explanation_body": explanation_body,
+		"explanation_rules": syntax_rules,
+		"explanation_prompt": explanation_prompt,
+		"keywords": keywords,
+		"example_code": example_code,
+		"adaptation_reason": "Local fallback is used only when generated tasks are unavailable.",
+		"fallback_hints": fallback_hints,
+		"validation_targets": validation_targets,
+		"pattern_id": "local_%s_%s" % [theme, _interaction_type],
+	}
+
+
 func _resolve_tutorial_submission(expected_code: String) -> void:
 	await get_tree().create_timer(0.2, true).timeout
 	_request_in_flight = false
 	run_button.disabled = _help_panel_open
 	explanation_button.disabled = false
 	if _normalize_tutorial_code(code_editor.text) != _normalize_tutorial_code(expected_code):
+		GameState.log_event("tutorial_code_validation_failed", _terminal_log_metadata({"attempt_number": _run_count}))
 		_set_rich_text(status_label, "%s: %s" % [String(_active_payload.get("failure_text", "Failed")), "tutorial code does not match yet"])
 		_show_hints(_active_payload.get("tutorial_failure_hints", ["Use the auto-filled tutorial code as shown, then press Run."]))
 		return
+	_terminal_success = true
+	GameState.log_event("tutorial_code_validation_succeeded", _terminal_log_metadata({"attempt_number": _run_count}))
 	code_editor.editable = false
 	run_button.disabled = true
 	close_button.disabled = true
@@ -604,6 +732,11 @@ func _update_help_panel() -> void:
 
 func _on_explanation_pressed() -> void:
 	_help_panel_open = not _help_panel_open
+	if _help_panel_open:
+		_explanation_open_count += 1
+		_explanation_open_tick_msec = Time.get_ticks_msec()
+	else:
+		_capture_explanation_read_time()
 	GameState.log_event("explanation_opened" if _help_panel_open else "explanation_closed", _terminal_log_metadata())
 	explanation_backdrop.visible = _help_panel_open
 	panel.visible = not _help_panel_open
@@ -618,6 +751,7 @@ func _on_explanation_pressed() -> void:
 
 
 func _close_explanation_panel() -> void:
+	_capture_explanation_read_time()
 	_help_panel_open = false
 	_timer_paused_by_help = false
 	explanation_backdrop.visible = false
@@ -627,6 +761,13 @@ func _close_explanation_panel() -> void:
 	run_button.disabled = _request_in_flight or _task_request_in_flight
 	hint_button.disabled = _hint_request_in_flight or _request_in_flight or _task_request_in_flight
 	explanation_button.text = "Explonation"
+
+
+func _capture_explanation_read_time() -> void:
+	if _explanation_open_tick_msec <= 0:
+		return
+	_explanation_read_seconds += float(Time.get_ticks_msec() - _explanation_open_tick_msec) / 1000.0
+	_explanation_open_tick_msec = 0
 
 
 func _on_explanation_scroll_up_pressed() -> void:
@@ -793,13 +934,25 @@ func _escape_bbcode(value: String) -> String:
 
 
 func _terminal_log_metadata(extra: Dictionary = {}) -> Dictionary:
+	var stage: Dictionary = GameState.get_current_stage()
 	var metadata := {
+		"terminal_session_id": _terminal_session_id,
 		"interaction_type": _interaction_type,
+		"stage_type": String(stage.get("type", "")),
+		"level_id": String(stage.get("level_id", "")),
 		"level_theme": String(_active_payload.get("level_theme", "")),
 		"difficulty": String(_active_payload.get("difficulty", "")),
 		"encounter_name": String(_active_payload.get("encounter_name", "")),
+		"generation_source": String(_active_payload.get("generation_source", "")),
+		"generation_detail": String(_active_payload.get("generation_detail", "")),
 		"pattern_id": String(_active_payload.get("pattern_id", "")),
 		"time_left": int(_time_left),
+		"elapsed_since_terminal_seconds": float(Time.get_ticks_msec() - _terminal_open_tick_msec) / 1000.0 if _terminal_open_tick_msec > 0 else 0.0,
+		"run_count": _run_count,
+		"hint_request_count": _hint_request_count,
+		"explanation_open_count": _explanation_open_count,
+		"explanation_read_seconds": _explanation_read_seconds,
+		"task_generation_seconds": _task_generation_seconds,
 	}
 	metadata.merge(extra, true)
 	return metadata

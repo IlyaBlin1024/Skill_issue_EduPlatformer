@@ -2,6 +2,41 @@ extends Area2D
 class_name EnemyEncounter
 
 const ENEMY_PROJECTILE_SCRIPT := preload("res://scripts/enemy_projectile.gd")
+const PRODUCTION_ANIMATION_LOADER := preload("res://scripts/production_animation_loader.gd")
+
+const ENEMY_SPRITE_CANVAS_SIZE := Vector2i(96, 96)
+const ENEMY_SPRITE_TARGET_HEIGHT := 76
+const ENEMY_SPRITE_MAX_WIDTH := 92
+const ENEMY_SPRITE_FOOT_MARGIN := 4
+const ENEMY_SPRITE_DIRS := {
+	"melee": [
+		"res://assets/production_art/models/characters/enemies/melee_sentinel",
+	],
+	"ranged": [
+		"res://assets/production_art/models/characters/enemies/ranged_sentinel",
+	],
+}
+const ENEMY_SPRITE_ANIMATIONS := {
+	"melee": {
+		"idle": {"prefix": "melee_idle", "fps": 6.0, "loop": true},
+		"patrol": {"prefix": "melee_patrol", "fps": 10.0, "loop": true},
+		"telegraph": {"prefix": "melee_telegraph", "fps": 10.0, "loop": false},
+		"attack": {"prefix": "melee_attack", "fps": 12.0, "loop": false},
+		"hurt": {"prefix": "melee_hurt", "fps": 10.0, "loop": false},
+		"death": {"prefix": "melee_death", "fps": 8.0, "loop": false},
+		"parried": {"prefix": "melee_parried", "fps": 10.0, "loop": false},
+	},
+	"ranged": {
+		"idle": {"prefix": "ranged_idle", "fps": 6.0, "loop": true},
+		"patrol": {"prefix": "ranged_patrol", "fps": 10.0, "loop": true},
+		"telegraph": {"prefix": "ranged_telegraph", "fps": 10.0, "loop": false},
+		"shoot": {"prefix": "ranged_shoot", "fps": 12.0, "loop": false},
+		"jump_back": {"prefix": "ranged_jump_back", "fps": 12.0, "loop": false},
+		"hurt": {"prefix": "ranged_hurt", "fps": 10.0, "loop": false},
+		"death": {"prefix": "ranged_death", "fps": 8.0, "loop": false},
+		"parried": {"prefix": "ranged_parried", "fps": 10.0, "loop": false},
+	},
+}
 
 signal encounter_started(encounter: EnemyEncounter, payload: Dictionary)
 signal encounter_defeated(encounter: EnemyEncounter)
@@ -74,6 +109,10 @@ var _special_move_height := 0.0
 var _parry_terminal_opened := false
 var _visual_base_position := Vector2.ZERO
 var _attack_animation_tween: Tween = null
+var _sprite: AnimatedSprite2D = null
+var _sprites_ready := false
+var _sprite_style_key := ""
+var _current_visual_animation := ""
 
 
 func _ready() -> void:
@@ -81,10 +120,12 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 	_patrol_center_x = global_position.x
 	_visual_base_position = visual.position
+	_setup_enemy_sprite()
 	_reset_stats()
 
 
 func _physics_process(delta: float) -> void:
+	_hide_legacy_visual_if_sprite_ready()
 	if _defeated:
 		return
 
@@ -159,6 +200,11 @@ func _physics_process(delta: float) -> void:
 	_patrol(delta)
 
 
+func _process(_delta: float) -> void:
+	_hide_legacy_visual_if_sprite_ready()
+	_update_enemy_sprite_direction()
+
+
 func configure(config: Dictionary) -> void:
 	level_theme = String(config.get("level_theme", level_theme))
 	difficulty = String(config.get("difficulty", difficulty))
@@ -210,6 +256,7 @@ func configure(config: Dictionary) -> void:
 	_base_ranged_hold_distance = _ranged_hold_distance
 	_base_telegraph_duration = _telegraph_duration
 	_reset_stats()
+	_setup_enemy_sprite()
 
 
 func reset_encounter() -> void:
@@ -313,6 +360,7 @@ func mark_defeated() -> void:
 	_defeated = true
 	_triggered = true
 	_clear_projectiles()
+	_play_enemy_visual("death")
 	call_deferred("_finalize_defeated_state")
 	encounter_defeated.emit(self)
 
@@ -450,6 +498,7 @@ func _can_use_ranged(planar_distance: float, vertical_distance: float) -> bool:
 
 
 func _patrol(delta: float) -> void:
+	_play_enemy_visual("patrol")
 	var left_limit: float = _patrol_center_x - _patrol_distance
 	var right_limit: float = _patrol_center_x + _patrol_distance
 	left_limit = maxf(left_limit, _patrol_min_x)
@@ -465,8 +514,10 @@ func _patrol(delta: float) -> void:
 func _move_towards(target_x: float, delta: float, speed: float) -> void:
 	var direction: float = signf(target_x - global_position.x)
 	if is_zero_approx(direction):
+		_play_enemy_visual("idle")
 		return
 	_move_direction = direction
+	_play_enemy_visual("patrol")
 	var left_limit: float = _patrol_center_x - _patrol_distance
 	var right_limit: float = _patrol_center_x + _patrol_distance
 	left_limit = maxf(left_limit, _patrol_min_x)
@@ -479,6 +530,7 @@ func _move_away_from(target_x: float, delta: float, speed: float) -> void:
 	if is_zero_approx(direction):
 		direction = _move_direction if not is_zero_approx(_move_direction) else 1.0
 	_move_direction = direction
+	_play_enemy_visual("patrol")
 	var left_limit: float = maxf(_patrol_center_x - _patrol_distance, _patrol_min_x)
 	var right_limit: float = minf(_patrol_center_x + _patrol_distance, _patrol_max_x)
 	global_position.x = clampf(global_position.x + direction * speed * delta, left_limit, right_limit)
@@ -538,6 +590,7 @@ func _on_projectile_target_hit(_projectile: EnemyProjectile, target: Node, damag
 	elif target is EnemyEncounter:
 		var target_encounter := target as EnemyEncounter
 		var defeated: bool = target_encounter.apply_combat_result({"damage": damage})
+		GameState.log_event("player_damage_dealt", {"amount": damage, "target": "enemy", "mode": "reflected_projectile"})
 		if defeated:
 			world_attack_feedback.emit("Reflected shot defeated %s." % target_encounter._style_display_name())
 		else:
@@ -573,6 +626,7 @@ func _current_idle_color() -> Color:
 
 
 func _flash_on_hit() -> void:
+	_play_enemy_visual("hurt")
 	visual.color = Color(1, 0.76, 0.45, 1)
 	var tween := create_tween()
 	tween.tween_property(visual, "color", _current_idle_color(), 0.25)
@@ -609,15 +663,19 @@ func _reset_stats() -> void:
 	visual.rotation = 0.0
 	_update_hp_label()
 	_update_state_label()
+	_play_enemy_visual("idle")
+	_hide_legacy_visual_if_sprite_ready()
 
 
 func _finalize_defeated_state() -> void:
 	set_deferred("monitoring", false)
 	set_deferred("monitorable", false)
-	set_deferred("visible", false)
 	var collision := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if collision:
 		collision.set_deferred("disabled", true)
+	if _sprites_ready:
+		await get_tree().create_timer(0.42).timeout
+	set_deferred("visible", false)
 
 
 func _clear_projectiles() -> void:
@@ -672,6 +730,7 @@ func _begin_attack_telegraph(attack_type: String) -> void:
 	_pending_attack_type = attack_type
 	_attack_telegraph_timer = _telegraph_duration
 	visual.color = Color(1.0, 0.92, 0.5, 1.0)
+	_play_enemy_visual("telegraph")
 	_play_telegraph_animation(attack_type)
 	_update_state_label()
 
@@ -693,6 +752,7 @@ func _handle_parried() -> void:
 	_stagger_timer = _parry_stagger_duration
 	_attack_cooldown = _parry_stagger_duration + 0.4
 	apply_combat_result({"damage": _parry_damage})
+	GameState.log_event("player_damage_dealt", {"amount": _parry_damage, "target": "enemy", "mode": "parry"})
 	visual.color = Color(0.76, 1.0, 0.78, 1.0)
 	_play_stagger_animation()
 	_update_state_label()
@@ -855,6 +915,7 @@ func _start_special_move(direction: float, distance: float, duration: float, hei
 	_special_move_timer = duration
 	_special_move_height = height
 	_move_direction = direction
+	_play_enemy_visual("jump_back" if _attack_style == "ranged" else "patrol")
 	_play_mobility_animation(direction)
 	return true
 
@@ -871,6 +932,8 @@ func _update_special_move(delta: float) -> void:
 
 
 func _play_telegraph_animation(attack_type: String) -> void:
+	if _sprites_ready:
+		return
 	_kill_attack_tween()
 	visual.position = _visual_base_position
 	var telegraph_color: Color = Color(1.0, 0.92, 0.5, 1.0) if attack_type == "melee" else Color(0.98, 0.84, 0.48, 1.0)
@@ -882,6 +945,8 @@ func _play_telegraph_animation(attack_type: String) -> void:
 
 
 func _play_attack_animation(attack_type: String) -> void:
+	if _play_enemy_visual("attack" if attack_type == "melee" else "shoot"):
+		return
 	_kill_attack_tween()
 	visual.position = _visual_base_position
 	visual.rotation = 0.0
@@ -903,6 +968,8 @@ func _play_attack_animation(attack_type: String) -> void:
 
 
 func _play_stagger_animation() -> void:
+	if _play_enemy_visual("parried"):
+		return
 	_kill_attack_tween()
 	visual.position = _visual_base_position
 	_attack_animation_tween = create_tween()
@@ -915,6 +982,8 @@ func _play_stagger_animation() -> void:
 
 
 func _play_mobility_animation(direction: float) -> void:
+	if _sprites_ready:
+		return
 	_kill_attack_tween()
 	visual.position = _visual_base_position
 	_attack_animation_tween = create_tween()
@@ -929,3 +998,108 @@ func _play_mobility_animation(direction: float) -> void:
 func _kill_attack_tween() -> void:
 	if _attack_animation_tween != null and _attack_animation_tween.is_running():
 		_attack_animation_tween.kill()
+
+
+func _setup_enemy_sprite() -> void:
+	if visual == null:
+		return
+	var fallback_visual := visual
+	var style_key := _enemy_sprite_style_key()
+	if _sprites_ready and _sprite != null and is_instance_valid(_sprite) and _sprite_style_key == style_key:
+		_play_enemy_visual("idle")
+		_hide_legacy_visual_if_sprite_ready()
+		return
+	_current_visual_animation = ""
+	var sprite_options := {
+		"name": "EnemySprite",
+		"canvas_size": ENEMY_SPRITE_CANVAS_SIZE,
+		"target_height": ENEMY_SPRITE_TARGET_HEIGHT,
+		"max_width": ENEMY_SPRITE_MAX_WIDTH,
+		"foot_margin": ENEMY_SPRITE_FOOT_MARGIN,
+		"initial_animation": "idle",
+		"hide_fallback_on_missing": true,
+	}
+	_sprite = PRODUCTION_ANIMATION_LOADER.create_sprite(
+		self,
+		_sprite,
+		fallback_visual,
+		ENEMY_SPRITE_DIRS.get(style_key, []),
+		ENEMY_SPRITE_ANIMATIONS.get(style_key, {}),
+		sprite_options
+	)
+	_sprites_ready = _sprite != null
+	_sprite_style_key = style_key if _sprites_ready else ""
+	_remove_legacy_visual_node(fallback_visual)
+	if _sprites_ready:
+		_play_enemy_visual("idle")
+		_hide_legacy_visual_if_sprite_ready()
+
+
+func _enemy_sprite_style_key() -> String:
+	return "ranged" if _attack_style == "ranged" else "melee"
+
+
+func _play_enemy_visual(animation_name: String) -> bool:
+	if not _sprites_ready or _sprite == null or _sprite.sprite_frames == null:
+		return false
+	_hide_legacy_visual_if_sprite_ready()
+	_update_enemy_sprite_direction()
+	var resolved_animation := animation_name
+	if not _sprite.sprite_frames.has_animation(resolved_animation):
+		resolved_animation = "idle"
+	if not _sprite.sprite_frames.has_animation(resolved_animation):
+		return false
+	if _current_visual_animation == resolved_animation and _sprite.is_playing():
+		_hide_legacy_visual_if_sprite_ready()
+		return true
+	_current_visual_animation = resolved_animation
+	_sprite.play(resolved_animation)
+	_hide_legacy_visual_if_sprite_ready()
+	return true
+
+
+func _update_enemy_sprite_direction() -> void:
+	if not _sprites_ready or _sprite == null:
+		return
+	var direction := _move_direction
+	if _player_visible and _player != null and is_instance_valid(_player):
+		var player_delta_x: float = _player.global_position.x - global_position.x
+		if not is_zero_approx(player_delta_x):
+			direction = signf(player_delta_x)
+	if not is_zero_approx(direction):
+		_sprite.flip_h = direction < 0.0
+
+
+func _remove_legacy_visual_node(fallback_visual: ColorRect) -> void:
+	if fallback_visual == null:
+		return
+	var dummy := ColorRect.new()
+	dummy.name = "HiddenLegacyVisual"
+	dummy.position = fallback_visual.position
+	dummy.size = fallback_visual.size
+	dummy.visible = false
+	dummy.modulate = Color(1, 1, 1, 0)
+	dummy.self_modulate = Color(1, 1, 1, 0)
+	dummy.color = Color(0, 0, 0, 0)
+	dummy.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	visual = dummy
+	if fallback_visual.get_parent() == self and is_instance_valid(fallback_visual):
+		remove_child(fallback_visual)
+		fallback_visual.free()
+
+
+func _hide_legacy_visual_if_sprite_ready() -> void:
+	if not _sprites_ready or visual == null:
+		return
+	if _attack_animation_tween != null and _attack_animation_tween.is_valid():
+		_attack_animation_tween.kill()
+		_attack_animation_tween = null
+	visual.visible = false
+	visual.modulate = Color(visual.modulate.r, visual.modulate.g, visual.modulate.b, 0.0)
+	visual.self_modulate = Color(visual.self_modulate.r, visual.self_modulate.g, visual.self_modulate.b, 0.0)
+	visual.color = Color(visual.color.r, visual.color.g, visual.color.b, 0.0)
+	visual.position = _visual_base_position
+	visual.scale = Vector2.ZERO
+	visual.rotation = 0.0
+	visual.z_index = -4096
+	visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
