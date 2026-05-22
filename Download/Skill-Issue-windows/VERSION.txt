@@ -1,3 +1,3 @@
-﻿Skill Issue local build
-Built at: 2026-05-22T08:52:36
-Repository: C:\Users\bli34\OneDrive\Документы\Playground\OpenCode
+version https://git-lfs.github.com/spec/v1
+oid sha256:2f52ec09d5b1d2b6b0d502dfa4cd3206b9e2714f46201dd61a78c14089c12975
+size 135
