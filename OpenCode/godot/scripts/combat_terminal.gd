@@ -152,6 +152,10 @@ func hide_terminal() -> void:
 	hint_scroll.scroll_vertical = 0
 
 
+func is_terminal_open() -> bool:
+	return panel.visible or help_panel.visible or explanation_backdrop.visible
+
+
 func _process(delta: float) -> void:
 	if not panel.visible or _request_in_flight or not _timer_enabled:
 		return

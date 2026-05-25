@@ -7,7 +7,7 @@ const PRODUCTION_ANIMATION_LOADER := preload("res://scripts/production_animation
 const ENEMY_SPRITE_CANVAS_SIZE := Vector2i(96, 96)
 const ENEMY_SPRITE_TARGET_HEIGHT := 76
 const ENEMY_SPRITE_MAX_WIDTH := 92
-const ENEMY_SPRITE_FOOT_MARGIN := 4
+const ENEMY_SPRITE_FOOT_MARGIN := 6
 const ENEMY_SPRITE_DIRS := {
 	"melee": [
 		"res://assets/production_art/models/characters/enemies/melee_sentinel",
@@ -18,23 +18,10 @@ const ENEMY_SPRITE_DIRS := {
 }
 const ENEMY_SPRITE_ANIMATIONS := {
 	"melee": {
-		"idle": {"prefix": "melee_idle", "fps": 6.0, "loop": true},
-		"patrol": {"prefix": "melee_patrol", "fps": 10.0, "loop": true},
-		"telegraph": {"prefix": "melee_telegraph", "fps": 10.0, "loop": false},
-		"attack": {"prefix": "melee_attack", "fps": 12.0, "loop": false},
-		"hurt": {"prefix": "melee_hurt", "fps": 10.0, "loop": false},
-		"death": {"prefix": "melee_death", "fps": 8.0, "loop": false},
-		"parried": {"prefix": "melee_parried", "fps": 10.0, "loop": false},
+		"idle": {"prefix": "melee_patrol", "fps": 10.0, "loop": true},
 	},
 	"ranged": {
-		"idle": {"prefix": "ranged_idle", "fps": 6.0, "loop": true},
-		"patrol": {"prefix": "ranged_patrol", "fps": 10.0, "loop": true},
-		"telegraph": {"prefix": "ranged_telegraph", "fps": 10.0, "loop": false},
-		"shoot": {"prefix": "ranged_shoot", "fps": 12.0, "loop": false},
-		"jump_back": {"prefix": "ranged_jump_back", "fps": 12.0, "loop": false},
-		"hurt": {"prefix": "ranged_hurt", "fps": 10.0, "loop": false},
-		"death": {"prefix": "ranged_death", "fps": 8.0, "loop": false},
-		"parried": {"prefix": "ranged_parried", "fps": 10.0, "loop": false},
+		"idle": {"prefix": "ranged_patrol", "fps": 10.0, "loop": true},
 	},
 }
 
@@ -555,6 +542,8 @@ func _attempt_melee_attack() -> void:
 		return
 	_player.apply_damage(_melee_damage)
 	world_attack_feedback.emit("%s slash hits for %d damage." % [_style_display_name(), _melee_damage])
+	if _sprites_ready or visual == null:
+		return
 	visual.color = Color(1, 0.52, 0.52, 1)
 	var tween := create_tween()
 	tween.tween_property(visual, "color", _current_idle_color(), 0.2)
@@ -626,7 +615,10 @@ func _current_idle_color() -> Color:
 
 
 func _flash_on_hit() -> void:
-	_play_enemy_visual("hurt")
+	if _play_enemy_visual("hurt"):
+		return
+	if visual == null:
+		return
 	visual.color = Color(1, 0.76, 0.45, 1)
 	var tween := create_tween()
 	tween.tween_property(visual, "color", _current_idle_color(), 0.25)
@@ -1005,6 +997,7 @@ func _setup_enemy_sprite() -> void:
 		return
 	var fallback_visual := visual
 	var style_key := _enemy_sprite_style_key()
+	_clear_orphan_enemy_sprites()
 	if _sprites_ready and _sprite != null and is_instance_valid(_sprite) and _sprite_style_key == style_key:
 		_play_enemy_visual("idle")
 		_hide_legacy_visual_if_sprite_ready()
@@ -1016,6 +1009,7 @@ func _setup_enemy_sprite() -> void:
 		"target_height": ENEMY_SPRITE_TARGET_HEIGHT,
 		"max_width": ENEMY_SPRITE_MAX_WIDTH,
 		"foot_margin": ENEMY_SPRITE_FOOT_MARGIN,
+		"preserve_source_canvas": true,
 		"initial_animation": "idle",
 		"hide_fallback_on_missing": true,
 	}
@@ -1036,7 +1030,9 @@ func _setup_enemy_sprite() -> void:
 
 
 func _enemy_sprite_style_key() -> String:
-	return "ranged" if _attack_style == "ranged" else "melee"
+	if _attack_style == "ranged":
+		return "ranged"
+	return "melee"
 
 
 func _play_enemy_visual(animation_name: String) -> bool:
@@ -1070,22 +1066,19 @@ func _update_enemy_sprite_direction() -> void:
 		_sprite.flip_h = direction < 0.0
 
 
+func _clear_orphan_enemy_sprites() -> void:
+	for child in get_children():
+		if child == _sprite:
+			continue
+		if child is AnimatedSprite2D and child.name == "EnemySprite":
+			remove_child(child)
+			child.free()
+
+
 func _remove_legacy_visual_node(fallback_visual: ColorRect) -> void:
-	if fallback_visual == null:
+	if fallback_visual == null or not is_instance_valid(fallback_visual):
 		return
-	var dummy := ColorRect.new()
-	dummy.name = "HiddenLegacyVisual"
-	dummy.position = fallback_visual.position
-	dummy.size = fallback_visual.size
-	dummy.visible = false
-	dummy.modulate = Color(1, 1, 1, 0)
-	dummy.self_modulate = Color(1, 1, 1, 0)
-	dummy.color = Color(0, 0, 0, 0)
-	dummy.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	visual = dummy
-	if fallback_visual.get_parent() == self and is_instance_valid(fallback_visual):
-		remove_child(fallback_visual)
-		fallback_visual.free()
+	visual = fallback_visual
 
 
 func _hide_legacy_visual_if_sprite_ready() -> void:

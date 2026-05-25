@@ -84,7 +84,6 @@ static func _hide_fallback_visual(fallback_visual: CanvasItem) -> void:
 	if fallback_visual is Control:
 		var control := fallback_visual as Control
 		control.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		control.size = Vector2.ZERO
 	for child in fallback_visual.get_children():
 		if child is CanvasItem:
 			_hide_fallback_visual(child as CanvasItem)
@@ -201,12 +200,16 @@ static func _normalize_image(source_image: Image, animation_info: Dictionary, op
 	if source_image.get_format() != Image.FORMAT_RGBA8:
 		source_image.convert(Image.FORMAT_RGBA8)
 
+	var canvas_size := Vector2i(options.get("canvas_size", Vector2i(96, 96)))
+	if bool(options.get("preserve_source_canvas", false)):
+		if source_image.get_width() == canvas_size.x and source_image.get_height() == canvas_size.y:
+			return ImageTexture.create_from_image(source_image.duplicate())
+
 	var used_rect: Rect2i = source_image.get_used_rect()
 	if used_rect.size.x <= 0 or used_rect.size.y <= 0:
 		return null
 
 	var cropped_image: Image = source_image.get_region(used_rect)
-	var canvas_size := Vector2i(options.get("canvas_size", Vector2i(96, 96)))
 	var target_height := int(animation_info.get("target_height", options.get("target_height", canvas_size.y - 12)))
 	var max_width := int(animation_info.get("max_width", options.get("max_width", canvas_size.x - 8)))
 	var foot_margin := int(animation_info.get("foot_margin", options.get("foot_margin", 4)))

@@ -1,0 +1,829 @@
+{
+  "{\"boss_mechanic\": \"\", \"difficulty\": \"easy\", \"encounter_name\": \"Caster Sentinel\", \"encounter_style\": \"ranged\", \"interaction_type\": \"combat\", \"language\": \"python\", \"level_theme\": \"variables\", \"structure_focus\": \"two or three short assignments that tune ranged combat values\", \"tutorial_mode\": false}": [
+    {
+      "created_at": "2026-05-22T15:32:07.956821+00:00",
+      "interaction_type": "combat",
+      "level_theme": "variables",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "combat",
+        "level_theme": "variables",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Adjusting Ranged Attack Stats",
+        "prompt": "Set the damage, speed, and cooldown for the Caster Sentinel's ranged attack using numeric variables.",
+        "gameplay_effect": "The attack will deal more damage, fire faster, and have a shorter cooldown.",
+        "syntax_rules": [
+          "Use integer variables for damage and cooldown",
+          "Use float variables for speed",
+          "Assign values directly to variables"
+        ],
+        "explanation_title": "Numeric Variables in Combat",
+        "explanation_body": "In combat scripting, numeric variables define how powerful and fast your attacks are. Changing these numbers directly affects gameplay\u2014higher damage means more health lost per hit, faster speed makes projectiles move quicker, and lower cooldown lets you attack more often. These values are usually integers or floats depending on whether they represent whole counts or decimal measurements.",
+        "explanation_rules": [
+          "Damage and cooldown are best as integers",
+          "Speed is best as a float",
+          "Variable names should reflect their purpose (e.g., attack_damage, proj_speed)"
+        ],
+        "explanation_prompt": "Look for keywords like damage, speed, and cooldown in the task and identify what numbers control those values.",
+        "keywords": [
+          "damage",
+          "speed",
+          "cooldown"
+        ],
+        "example_code": "# Set the damage dealt by the ranged attack\nattack_damage = 25    # damage value\n# Set how fast the projectile moves\nproj_speed = 4.5      # speed value\n# Set time between attacks\nattack_cooldown = 2   # cooldown value",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around attack damage, projectile speed, attack cooldown.",
+          "Keep the snippet focused on the exact prompt: Set the damage, speed, and cooldown for the Caster Sentinel's ranged attack using numeric variables."
+        ],
+        "validation_targets": [
+          "attack damage",
+          "projectile speed",
+          "attack cooldown"
+        ],
+        "pattern_id": ""
+      }
+    },
+    {
+      "created_at": "2026-05-22T15:32:19.438428+00:00",
+      "interaction_type": "combat",
+      "level_theme": "variables",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "combat",
+        "level_theme": "variables",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Adjust Ranged Attack Stats",
+        "prompt": "Tune the Caster Sentinel's ranged attack by modifying attack power, cooldown, and accuracy using simple operators.",
+        "gameplay_effect": "Changes how much damage, how fast, and how often the sentinel attacks.",
+        "syntax_rules": [
+          "Use +=, -=, or *= to adjust stats",
+          "Assign new values to variables like attack_power, cooldown_time, or hit_accuracy"
+        ],
+        "explanation_title": "Modifying Combat Variables",
+        "explanation_body": "In combat scripting, variables hold values that control how attacks behave. By using operators like +=, you can increase or decrease these values dynamically. This allows for fine-tuning of gameplay balance without rewriting entire systems. Think of each operator as a way to tweak a stat in real time.",
+        "explanation_rules": [
+          "Operators modify existing values instead of replacing them completely",
+          "Variable names should reflect their purpose (e.g., attack_power, cooldown_time)"
+        ],
+        "explanation_prompt": "Look for keywords like attack power, cooldown, and accuracy in the task and identify which variables need adjustment.",
+        "keywords": [
+          "attack power",
+          "cooldown",
+          "accuracy"
+        ],
+        "example_code": "# Set initial values for the Caster Sentinel's ranged attack\nattack_power = 20        # Base damage\ncooldown_time = 1.5      # Time between attacks\nhit_accuracy = 0.8       # Chance to hit (0.0 to 1.0)\n\n# Modify the attack power by increasing it\nattack_power += 5        # Increases damage by 5\n\n# Modify the cooldown time by decreasing it\ncooldown_time -= 0.3     # Reduces delay between attacks\n\n# Modify the accuracy by multiplying it\nhit_accuracy *= 0.9      # Slightly reduces hit chance",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around attack damage, attack speed, hit chance.",
+          "Keep the snippet focused on the exact prompt: Tune the Caster Sentinel's ranged attack by modifying attack power, cooldown, and accuracy using simple operators."
+        ],
+        "validation_targets": [
+          "attack damage",
+          "attack speed",
+          "hit chance"
+        ],
+        "pattern_id": ""
+      }
+    }
+  ],
+  "{\"boss_mechanic\": \"\", \"difficulty\": \"easy\", \"encounter_name\": \"Blade Sentinel\", \"encounter_style\": \"melee\", \"interaction_type\": \"combat\", \"language\": \"python\", \"level_theme\": \"variables\", \"structure_focus\": \"two or three short assignments that tune melee combat values\", \"tutorial_mode\": false}": [
+    {
+      "created_at": "2026-05-22T15:34:34.394941+00:00",
+      "interaction_type": "combat",
+      "level_theme": "variables",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "combat",
+        "level_theme": "variables",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-7B-Instruct, attempt 1)",
+        "title": "Melee Strike Script",
+        "prompt": "In the combat against the Blade Sentinel, you need to adjust your melee strike parameters. Set up a script that changes your attack power based on whether you're dodging or not. If you're dodging, increase your attack power by 20%. Otherwise, set it back to normal.",
+        "gameplay_effect": "Your attack power will change depending on whether you're dodging or not.",
+        "syntax_rules": [
+          "Use `if` statements to check conditions.",
+          "Use `+=` to increase a variable's value.",
+          "Use `=` to assign a new value to a variable."
+        ],
+        "explanation_title": "Variables in Combat",
+        "explanation_body": "In combat, variables store specific values that control gameplay elements. For example, `attack_power` controls how strong your attacks are. To change this value based on certain conditions, you can use an `if` statement to check if you're dodging. If true, you can increase `attack_power` by 20% using the `+=` operator. If false, you can simply set `attack_power` back to its normal value using the `=` operator.",
+        "explanation_rules": [
+          "A variable is a named storage location for a value.",
+          "Use `if` statements to execute code based on conditions.",
+          "Use `+=` to increase a variable's value.",
+          "Use `=` to assign a new value to a variable."
+        ],
+        "explanation_prompt": "Read the task carefully and look for phrases related to changing values during combat. Focus on keywords like \"dodge,\" \"increase,\" and \"set.\"",
+        "keywords": [
+          "dodge",
+          "increase",
+          "set",
+          "attack_power"
+        ],
+        "example_code": "# Define initial attack power\nattack_power = 50\n\n# Check if dodging\nis_dodging = True\n\n# Increase attack power if dodging\nif is_dodging:\n    attack_power += 20  # Increase attack power by 20%\n\n# Set attack power back to normal if not dodging\nelse:\n    attack_power = 50  # Reset attack power to normal\n\nprint(\"Attack Power:\", attack_power)  # Output the updated attack power",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around attack damage, combat mode.",
+          "Keep the snippet focused on the exact prompt: In the combat against the Blade Sentinel, you need to adjust your melee strike parameters. Set up a script that changes "
+        ],
+        "validation_targets": [
+          "attack damage",
+          "combat mode"
+        ],
+        "pattern_id": ""
+      }
+    },
+    {
+      "created_at": "2026-05-22T15:35:50.366164+00:00",
+      "interaction_type": "combat",
+      "level_theme": "variables",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "combat",
+        "level_theme": "variables",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Melee Strike Setup",
+        "prompt": "Set up the blade's attack damage, guard window, and recovery time for the next strike",
+        "gameplay_effect": "Adjusting these values changes how your melee attacks feel and when you can act again",
+        "syntax_rules": [
+          "Assign integer values to variables using = operator",
+          "Use descriptive names like attack_damage, guard_window, or recovery_time"
+        ],
+        "explanation_title": "Numeric Variables in Combat",
+        "explanation_body": "In combat scripting, numeric variables control core mechanics like how much damage an attack deals, how long you can defend, and how quickly you recover after striking. Changing these numbers directly affects gameplay balance and player experience. Each value is a simple number that can be updated with assignment or math operations.",
+        "explanation_rules": [
+          "Variable names should clearly describe their purpose (e.g., attack_damage)",
+          "Integer values are used for whole numbers like damage points or seconds"
+        ],
+        "explanation_prompt": "Look for keywords like damage, window, and time in the task to identify what stats to adjust",
+        "keywords": [
+          "attack damage",
+          "guard window",
+          "recovery time"
+        ],
+        "example_code": "# Set the power of your strike\nattack_damage = 15    # How much damage your blade deals\n# Define how long you can block\nguard_window = 0.3    # Time in seconds you're protected\n# Control how fast you recover after attacking\nrecovery_time = 0.5   # Seconds until next action possible",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around attack damage, guard window duration.",
+          "Keep the snippet focused on the exact prompt: Set up the blade's attack damage, guard window, and recovery time for the next strike"
+        ],
+        "validation_targets": [
+          "attack damage",
+          "guard window duration"
+        ],
+        "pattern_id": ""
+      }
+    }
+  ],
+  "{\"boss_mechanic\": \"\", \"difficulty\": \"easy\", \"encounter_name\": \"Forge Altar\", \"encounter_style\": \"weapon_forge\", \"interaction_type\": \"altar\", \"language\": \"python\", \"level_theme\": \"variables\", \"structure_focus\": \"clear weapon-stat assignments\", \"tutorial_mode\": false}": [
+    {
+      "created_at": "2026-05-22T15:37:39.486945+00:00",
+      "interaction_type": "altar",
+      "level_theme": "variables",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "altar",
+        "level_theme": "variables",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Guard Window Tuning",
+        "prompt": "Set the guard window duration and recovery time for your forged blade. Use names like guard_window or recovery_time.",
+        "gameplay_effect": "Adjusting these values changes how long you can block and how quickly you recover after guarding.",
+        "syntax_rules": [
+          "Assign integer values to variables",
+          "Use descriptive names that reflect the weapon's behavior"
+        ],
+        "explanation_title": "Boolean States in Combat",
+        "explanation_body": "In combat, boolean values represent simple on/off states such as whether a character is currently guarding or ready to act. These are often used to control animations, timing windows, and defensive actions. They're usually set to True or False based on conditions like input or cooldowns.",
+        "explanation_rules": [
+          "Booleans are either True or False",
+          "They control state-based behaviors in combat systems"
+        ],
+        "explanation_prompt": "Look for keywords that indicate active states like guarding or ready, and see how they're controlled by simple true/false flags.",
+        "keywords": [
+          "guard window",
+          "recovery time",
+          "guarding state"
+        ],
+        "example_code": "# Set the duration in frames that you can guard\nguard_window = 15  # guard_window: how long you can block\n# Set the time needed to recover after guarding\nrecovery_time = 10  # recovery_time: delay before next attack\n# Example of a guard state flag\nis_guarding = True  # is_guarding: tracks if player is currently blocking",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the forge task to code concepts around guard window duration, recovery timing, guard state flag.",
+          "Keep every line connected to the same weapon setup instead of writing generic combat code."
+        ],
+        "validation_targets": [
+          "guard window duration",
+          "recovery timing",
+          "guard state flag"
+        ],
+        "pattern_id": ""
+      }
+    },
+    {
+      "created_at": "2026-05-22T15:37:40.184020+00:00",
+      "interaction_type": "altar",
+      "level_theme": "variables",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "altar",
+        "level_theme": "variables",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Forge Your Weapon's Edge",
+        "prompt": "Set the blade's damage, the hilt's guard timing, and the shield sigil's recovery seal using clear variable names like blade_damage, hilt_guard_window, and shield_recovery.",
+        "gameplay_effect": "These stats will define how your weapon strikes, defends, and recovers during combat.",
+        "syntax_rules": [
+          "Assign integer values to weapon stats",
+          "Use descriptive variable names that reflect their purpose"
+        ],
+        "explanation_title": "Changing Weapon Stats",
+        "explanation_body": "In combat, weapon stats control how your attacks perform and how you respond to enemy actions. Each stat can be adjusted through direct assignment or by modifying its current value. Understanding how to change these numbers helps you tailor your weapon to your playstyle. Simple operators like += or -= allow you to increase or decrease values based on conditions or events.",
+        "explanation_rules": [
+          "Variables store numeric values that influence gameplay",
+          "Operators like += modify existing values instead of replacing them"
+        ],
+        "explanation_prompt": "Look for the three weapon components mentioned in the task and identify which stat affects damage, defense timing, and recovery speed.",
+        "keywords": [
+          "blade damage",
+          "guard timing",
+          "recovery seal"
+        ],
+        "example_code": "# Blade damage determines strike power\nblade_damage = 15    # This sets the base damage\n# Guard timing controls defense window\nhilt_guard_window = 30   # This sets how long you can block\n# Recovery seal affects post-attack cooldown\nshield_recovery = 20     # This sets recovery time after hit\nblade_damage += 5      # Example of increasing damage\nhilt_guard_window -= 10   # Example of reducing guard time\nshield_recovery *= 2     # Example of doubling recovery time",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the forge task to code concepts around attack damage, guard window, recovery time.",
+          "Keep every line connected to the same weapon setup instead of writing generic combat code."
+        ],
+        "validation_targets": [
+          "attack damage",
+          "guard window",
+          "recovery time"
+        ],
+        "pattern_id": ""
+      }
+    }
+  ],
+  "{\"boss_mechanic\": \"Combine values, branches, loops and functions across shifting phases.\", \"difficulty\": \"easy\", \"encounter_name\": \"System Admin\", \"encounter_style\": \"system_admin\", \"interaction_type\": \"boss\", \"language\": \"python\", \"level_theme\": \"integration\", \"structure_focus\": \"boss opening plan with a compact mixed tactic that still stays readable\", \"tutorial_mode\": false}": [
+    {
+      "created_at": "2026-05-23T15:38:45.589709+00:00",
+      "interaction_type": "boss",
+      "level_theme": "integration",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "boss",
+        "level_theme": "integration",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Boss Phase Integration",
+        "prompt": "Design a compact opening plan that combines attack damage, movement speed, and shield durability into one readable tactic for the System Admin boss.",
+        "gameplay_effect": "Your opening plan will determine how well your initial strategy adapts through the boss's shifting phases.",
+        "syntax_rules": [
+          "Use clear variable names like attack_power, move_speed, or shield_durability",
+          "Combine these stats into a single tactic function that returns a prepared plan"
+        ],
+        "explanation_title": "Integrating Combat Stats",
+        "explanation_body": "Integration in combat means merging different stats like attack power, movement speed, and shield strength into a unified approach. This helps you adapt quickly during the boss's changing phases. Instead of handling each stat separately, combine them logically into one readable tactic that works across all situations.",
+        "explanation_rules": [
+          "Keep variable names descriptive and consistent with gameplay terms",
+          "Ensure your tactic function returns a clear, organized plan"
+        ],
+        "explanation_prompt": "Look for how multiple stats are combined into one cohesive opening strategy",
+        "keywords": [
+          "attack damage",
+          "movement speed",
+          "shield durability"
+        ],
+        "example_code": "# Plan for System Admin boss\ndef opening_tactic():\n    # attack_damage = 50\n    # move_speed = 30\n    # shield_durability = 70\n    return {\n        \"attack\": 50,\n        \"speed\": 30,\n        \"shield\": 70\n    }\n# This tactic integrates all core stats into one readable package",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around attack power, move speed, shield strength.",
+          "Keep the snippet focused on the exact prompt: Design a compact opening plan that combines attack damage, movement speed, and shield durability into one readable tacti"
+        ],
+        "validation_targets": [
+          "attack power",
+          "move speed",
+          "shield strength"
+        ],
+        "pattern_id": ""
+      }
+    },
+    {
+      "created_at": "2026-05-23T16:46:37.239565+00:00",
+      "interaction_type": "boss",
+      "level_theme": "integration",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "boss",
+        "level_theme": "integration",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Boss Phase Integration",
+        "prompt": "Design a compact opening tactic that combines branching logic, looping damage, and a function call to survive the first system phase",
+        "gameplay_effect": "Your opening plan must adapt to system shifts while maintaining consistent damage output",
+        "syntax_rules": [
+          "Use if/elif/else to handle different system states",
+          "Implement a for loop to apply repeated damage effects",
+          "Define a function to encapsulate a core damage pattern"
+        ],
+        "explanation_title": "Combining Constructs for Boss Tactics",
+        "explanation_body": "When building boss tactics, you must choose which programming constructs truly support your gameplay goals. Branching lets you react to system changes, loops let you apply consistent pressure, and functions let you reuse reliable patterns. Not every construct needs to be used\u2014only those that improve readability and gameplay effectiveness. This balance keeps your code both functional and maintainable during complex encounters.",
+        "explanation_rules": [
+          "Only use constructs that directly support gameplay flow",
+          "Keep logic readable even when combining multiple elements"
+        ],
+        "explanation_prompt": "Look for keywords like system states, repeated damage, and core patterns to identify where to place each construct",
+        "keywords": [
+          "system states",
+          "repeated damage",
+          "core pattern"
+        ],
+        "example_code": "# Damage function for consistent attacks\ndef core_damage():\n    # This function handles the base damage pattern\n    return 10\n\n# Main tactic logic\nsystem_state = \"normal\"  # Could be \"alert\", \"critical\", etc.\n\nif system_state == \"normal\":\n    # Standard damage loop\n    for i in range(3):\n        print(\"Attacking with\", core_damage(), \"damage\")\nelif system_state == \"alert\":\n    # Adjusted damage loop\n    for i in range(5):\n        print(\"Attacking with\", core_damage() * 2, \"damage\")",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around system adaptation, damage consistency.",
+          "Keep the snippet focused on the exact prompt: Design a compact opening tactic that combines branching logic, looping damage, and a function call to survive the first "
+        ],
+        "validation_targets": [
+          "system adaptation",
+          "damage consistency"
+        ],
+        "pattern_id": ""
+      }
+    }
+  ],
+  "{\"boss_mechanic\": \"Read state changes and branch your tactic correctly.\", \"difficulty\": \"easy\", \"encounter_name\": \"Logic Spider\", \"encounter_style\": \"logic_spider\", \"interaction_type\": \"boss\", \"language\": \"python\", \"level_theme\": \"conditions\", \"structure_focus\": \"boss opening plan with one readable branch for close or far responses\", \"tutorial_mode\": false}": [
+    {
+      "created_at": "2026-05-23T15:36:18.053020+00:00",
+      "interaction_type": "boss",
+      "level_theme": "conditions",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "boss",
+        "level_theme": "conditions",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Logic Spider's State Branch",
+        "prompt": "Plan your attack based on whether the Logic Spider is close or far away. Use a condition to choose between melee strike or ranged web shot.",
+        "gameplay_effect": "Your choice affects damage dealt and risk taken during the boss fight.",
+        "syntax_rules": [
+          "Use if/else to check distance state",
+          "Boolean expressions must compare distance values"
+        ],
+        "explanation_title": "Conditional Combat Decisions",
+        "explanation_body": "In combat, you often need to react differently depending on the situation. When the boss is close, you might want to strike with melee; when it's far, you might prefer a ranged attack. This uses a condition to check the boss's position and pick the right response. The result depends on whether the condition is true or false.",
+        "explanation_rules": [
+          "Conditions return True or False",
+          "Each branch runs only when its condition matches"
+        ],
+        "explanation_prompt": "Look for keywords like \"close\" and \"far\" to identify the condition, then find which action follows each outcome",
+        "keywords": [
+          "close or far",
+          "attack type"
+        ],
+        "example_code": "# If spider is near, use melee\n# Else use ranged\nif spider_distance < 3:\n    # close attack\n    attack_type = \"melee_strike\"\nelse:\n    # far attack\n    attack_type = \"web_shot\"",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around attack type, distance state.",
+          "Keep the snippet focused on the exact prompt: Plan your attack based on whether the Logic Spider is close or far away. Use a condition to choose between melee strike "
+        ],
+        "validation_targets": [
+          "attack type",
+          "distance state"
+        ],
+        "pattern_id": ""
+      }
+    },
+    {
+      "created_at": "2026-05-23T16:44:41.057665+00:00",
+      "interaction_type": "boss",
+      "level_theme": "conditions",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "boss",
+        "level_theme": "conditions",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Logic Spider's State Check",
+        "prompt": "Write a conditional branch that picks a combat move based on whether the Spider is close or far.",
+        "gameplay_effect": "Your attack choice changes depending on the Spider's distance.",
+        "syntax_rules": [
+          "Use if/else to check a boolean condition",
+          "Compare distance values with comparison operators"
+        ],
+        "explanation_title": "Boolean Checks in Combat",
+        "explanation_body": "In combat, you often need to react to the boss's current state. A boolean check lets you choose different actions based on whether a condition is true or false. This avoids random choices and makes your strategy more reliable. Think of it like choosing between a melee strike or ranged shot based on distance.",
+        "explanation_rules": [
+          "Test one condition at a time with if/else",
+          "Use comparison operators like < or > to evaluate distance"
+        ],
+        "explanation_prompt": "Look for keywords like \"close\" and \"far\" to identify the condition you need to test.",
+        "keywords": [
+          "close or far",
+          "distance check"
+        ],
+        "example_code": "# If spider is close, use melee attack\n# If spider is far, use ranged attack\nif spider_distance < 5:\n    # close attack\n    perform_melee_strike()\nelse:\n    # far attack\n    perform_ranged_shot()",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around attack type, combat decision.",
+          "Keep the snippet focused on the exact prompt: Write a conditional branch that picks a combat move based on whether the Spider is close or far."
+        ],
+        "validation_targets": [
+          "attack type",
+          "combat decision"
+        ],
+        "pattern_id": ""
+      }
+    }
+  ],
+  "{\"boss_mechanic\": \"Build repeatable tactics without falling into wasteful loops.\", \"difficulty\": \"easy\", \"encounter_name\": \"Assembly Golem\", \"encounter_style\": \"assembly_golem\", \"interaction_type\": \"boss\", \"language\": \"python\", \"level_theme\": \"loops\", \"structure_focus\": \"boss opening plan with one controlled repeated pattern\", \"tutorial_mode\": false}": [
+    {
+      "created_at": "2026-05-23T15:37:50.085922+00:00",
+      "interaction_type": "boss",
+      "level_theme": "loops",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "boss",
+        "level_theme": "loops",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Shield Pulse Repetition",
+        "prompt": "Make the Assembly Golem's shield pulse three times in a row during its opening move, using a loop that counts each pulse",
+        "gameplay_effect": "The golem will defend itself with a strong shield pulse sequence that repeats exactly three times",
+        "syntax_rules": [
+          "Use a for loop with range(3) to repeat exactly three times",
+          "Each loop iteration should print \"Shield pulse #\" followed by the number",
+          "Keep the loop body simple with just one print statement per iteration"
+        ],
+        "explanation_title": "Loop Counting for Repeated Actions",
+        "explanation_body": "When you need to do something multiple times in a predictable way, a loop with a counter helps keep track of repetitions. In this case, we want the golem to pulse its shield exactly three times. Using a for loop with range(3) gives us a clean way to repeat an action while keeping the count visible and manageable. This approach avoids hardcoding the same lines over and over, making your code easier to read and change later.",
+        "explanation_rules": [
+          "Always use range() with a fixed number for predictable repetitions",
+          "Keep loop bodies simple and focused on one action per iteration"
+        ],
+        "explanation_prompt": "Look for keywords like \"repeat\", \"three times\", and \"loop\" to identify the needed repetition pattern",
+        "keywords": [
+          "shield pulse",
+          "repeat three times",
+          "loop counter"
+        ],
+        "example_code": "# Shield pulse sequence - this shows how to repeat 3 times\nfor i in range(3):  # <--- loop repeats 3 times\n    print(\"Shield pulse #\" + str(i+1))  # <--- each pulse numbered\n# Output would be:\n# Shield pulse #1\n# Shield pulse #2\n# Shield pulse #3",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around shield pulse sequence, repeat count.",
+          "Keep the snippet focused on the exact prompt: Make the Assembly Golem's shield pulse three times in a row during its opening move, using a loop that counts each pulse"
+        ],
+        "validation_targets": [
+          "shield pulse sequence",
+          "repeat count"
+        ],
+        "pattern_id": ""
+      }
+    },
+    {
+      "created_at": "2026-05-23T16:45:24.004346+00:00",
+      "interaction_type": "boss",
+      "level_theme": "loops",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "boss",
+        "level_theme": "loops",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Shield Pulse Repetition",
+        "prompt": "Make the Assembly Golem's shield pulse three times in a row with a short delay between each pulse",
+        "gameplay_effect": "The golem will defend itself with a strong, repeated shield activation",
+        "syntax_rules": [
+          "Use a loop to repeat the shield action exactly 3 times",
+          "Add a small delay between each pulse using time.sleep(0.5)"
+        ],
+        "explanation_title": "Looping Combat Actions",
+        "explanation_body": "In combat, you often need to repeat actions like attacks or defenses. A loop lets you do the same thing multiple times without writing the same code over and over. The key is keeping the loop body small and focused on one action. This prevents wasted effort and keeps your strategy tight. Always include a stopping condition to avoid infinite loops.",
+        "explanation_rules": [
+          "Keep loop bodies small and simple",
+          "Use a counter or fixed number to control repetitions"
+        ],
+        "explanation_prompt": "Look for keywords like \"repeat\", \"pulse\", and \"times\" to identify the loop pattern needed",
+        "keywords": [
+          "shield pulse",
+          "repeat three times"
+        ],
+        "example_code": "# Set up the shield pulse sequence\ndef shield_pulse_sequence():\n    # TODO: Create a loop that repeats 3 times\n    # Each iteration should call shield_pulse()\n    # Add a small delay between pulses\n    pass\n\n# Example of what the loop might look like:\n# for i in range(3):\n#     shield_pulse()\n#     time.sleep(0.5)",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around shield activation, repeated defense.",
+          "Keep the snippet focused on the exact prompt: Make the Assembly Golem's shield pulse three times in a row with a short delay between each pulse"
+        ],
+        "validation_targets": [
+          "shield activation",
+          "repeated defense"
+        ],
+        "pattern_id": ""
+      }
+    }
+  ],
+  "{\"boss_mechanic\": \"Structure reusable responses to named attack patterns.\", \"difficulty\": \"easy\", \"encounter_name\": \"Archivist\", \"encounter_style\": \"archivist\", \"interaction_type\": \"boss\", \"language\": \"python\", \"level_theme\": \"functions\", \"structure_focus\": \"boss opening plan with one helper routine the player can reason about\", \"tutorial_mode\": false}": [
+    {
+      "created_at": "2026-05-23T15:38:26.605362+00:00",
+      "interaction_type": "boss",
+      "level_theme": "functions",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "boss",
+        "level_theme": "functions",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Boss Attack Patterns",
+        "prompt": "Create a function called attack_combo that takes a parameter called attack_name and prints a message about the attack pattern. Use this function to handle three different attacks: slash, stab, and charge.",
+        "gameplay_effect": "Your combat routine will execute different attack messages based on the attack name you pass in.",
+        "syntax_rules": [
+          "Define the function with def attack_combo(attack_name):",
+          "Use print() to display messages",
+          "Call the function with different attack names"
+        ],
+        "explanation_title": "Reusable Combat Logic",
+        "explanation_body": "In boss fights, you often repeat similar actions with small changes. Instead of rewriting the same code over and over, define a function once and call it multiple times. This makes your code cleaner and easier to manage. Functions let you organize your logic so that one part of your code can be reused in many places. Think of it like having a set of instructions you can follow again and again.",
+        "explanation_rules": [
+          "A function must be defined before it's called",
+          "Parameters allow functions to accept different inputs"
+        ],
+        "explanation_prompt": "Look for the word \"function\" and identify what kind of attack pattern each call handles",
+        "keywords": [
+          "attack combo",
+          "attack name"
+        ],
+        "example_code": "def attack_combo(attack_name): # This function handles one type of attack\n    print(\"Executing\", attack_name, \"attack!\")\n\nattack_combo(\"slash\")  # This calls the function with the attack name\nattack_combo(\"stab\")\nattack_combo(\"charge\")",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around attack pattern, attack sequence.",
+          "Keep the snippet focused on the exact prompt: Create a function called attack_combo that takes a parameter called attack_name and prints a message about the attack pa"
+        ],
+        "validation_targets": [
+          "attack pattern",
+          "attack sequence"
+        ],
+        "pattern_id": ""
+      }
+    },
+    {
+      "created_at": "2026-05-23T16:46:05.106940+00:00",
+      "interaction_type": "boss",
+      "level_theme": "functions",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "boss",
+        "level_theme": "functions",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Boss Combat Helper",
+        "prompt": "Create a helper function called attack_pattern that takes a string parameter called pattern_name and prints \"Executing: [pattern_name]\" when called.",
+        "gameplay_effect": "This helps organize your combat moves into reusable routines.",
+        "syntax_rules": [
+          "Define the function with def attack_pattern():",
+          "Use the parameter pattern_name inside the print statement",
+          "Call the function with a string argument like \"slash_combo\""
+        ],
+        "explanation_title": "Functions for Combat Tactics",
+        "explanation_body": "In boss fights, you'll often repeat similar actions. A function lets you define a combat tactic once and reuse it whenever needed. This saves time and makes your code cleaner. The function accepts a pattern_name parameter to customize which attack you're executing.",
+        "explanation_rules": [
+          "Function definitions start with def",
+          "Parameters go inside parentheses after the function name"
+        ],
+        "explanation_prompt": "Look for the word 'helper' and the term 'attack_pattern' in the task to identify what to build.",
+        "keywords": [
+          "helper function",
+          "attack pattern"
+        ],
+        "example_code": "def attack_pattern(pattern_name):  # <-- helper function\n    print(\"Executing: \" + pattern_name)  # <-- reusable tactic\n\nattack_pattern(\"slash_combo\")  # <-- call the function",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around combat routine, attack sequence.",
+          "Keep the snippet focused on the exact prompt: Create a helper function called attack_pattern that takes a string parameter called pattern_name and prints \"Executing: "
+        ],
+        "validation_targets": [
+          "combat routine",
+          "attack sequence"
+        ],
+        "pattern_id": ""
+      }
+    }
+  ],
+  "{\"boss_mechanic\": \"Tune tactic variables before and during the fight.\", \"difficulty\": \"easy\", \"encounter_name\": \"Threshold Warden\", \"encounter_style\": \"threshold_warden\", \"interaction_type\": \"boss\", \"language\": \"python\", \"level_theme\": \"variables\", \"structure_focus\": \"boss opening plan with stat assignments that tune timing, damage, or guard values\", \"tutorial_mode\": false}": [
+    {
+      "created_at": "2026-05-23T16:44:31.341432+00:00",
+      "interaction_type": "boss",
+      "level_theme": "variables",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "boss",
+        "level_theme": "variables",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Tune the Warden's Shield",
+        "prompt": "Set the Threshold Warden's initial shield durability to 150 and reduce it by 25 each time it blocks an attack. Use a variable named like shield_durability or warden_shield. Set the Threshold Warden's initial shield durability to 150 and reduce it by 25 each time it blocks an attack. Use a variable named like shield_durability or warden_shield.",
+        "gameplay_effect": "Adjusting the shield value affects how many hits the Warden can absorb before breaking. Adjusting the shield value affects how many hits the Warden can absorb before breaking.",
+        "syntax_rules": [
+          "Use = to assign initial values",
+          "Use -= to decrease values",
+          "Variable names must reflect shield-related gameplay",
+          "Use = to assign initial values",
+          "Use -= to decrease values",
+          "Variable names must reflect shield-related gameplay"
+        ],
+        "explanation_title": "Changing Stats with Operators Changing Stats with Operators",
+        "explanation_body": "When you change a variable's value using operators like -=, you're updating its current state. This is useful for tracking things like shield health or damage over time. In combat, these updates happen instantly and affect the next action. When you change a variable's value using operators like -=, you're updating its current state. This is useful for tracking things like shield health or damage over time. In combat, these updates happen instantly and affect the next action.",
+        "explanation_rules": [
+          "Variables store values that can be updated",
+          "Operators like -= modify existing values",
+          "Variables store values that can be updated",
+          "Operators like -= modify existing values"
+        ],
+        "explanation_prompt": "Look for keywords like shield, durability, and reduction in the task to identify what numbers to change and how. Look for keywords like shield, durability, and reduction in the task to identify what numbers to change and how.",
+        "keywords": [
+          "shield durability",
+          "reduce by",
+          "shield durability",
+          "reduce by"
+        ],
+        "example_code": "# Set starting shield durability\nwarden_shield = 150  # shield_durability\n# Reduce shield when blocking\nwarden_shield -= 25  # This decreases the shield by 25 points\n# Example: shield now equals 125\n# Set starting shield durability\nwarden_shield = 150  # shield_durability\n# Reduce shield when blocking\nwarden_shield -= 25  # This decreases the shield by 25 points\n# Example: shield now equals 125",
+        "adaptation_reason": "The player is handling this theme reasonably well, so use a balanced challenge.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around shield health, defense strength, shield health.",
+          "Keep the snippet focused on the exact prompt: Set the Threshold Warden's initial shield durability to 150 and reduce it by 25 each time it blocks an attack. Use a var"
+        ],
+        "validation_targets": [
+          "shield health",
+          "defense strength",
+          "shield health",
+          "defense strength"
+        ],
+        "pattern_id": ""
+      }
+    },
+    {
+      "created_at": "2026-05-24T06:01:38.171251+00:00",
+      "interaction_type": "boss",
+      "level_theme": "variables",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "boss",
+        "level_theme": "variables",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Adjust Guard Timing Before the Warden's Charge",
+        "prompt": "Set the guard_window variable to 0.4 seconds and the recovery_time to 0.6 seconds before the Threshold Warden begins its attack pattern.",
+        "gameplay_effect": "These settings control how long you can block and recover after being hit.",
+        "syntax_rules": [
+          "Use = to assign numeric values to variables",
+          "Assign values as decimals (floats) for timing"
+        ],
+        "explanation_title": "Variable Reassignment in Combat",
+        "explanation_body": "In combat, variables store important gameplay values like guard window duration and recovery time. When you set these values early, they determine how your character behaves during the fight. Reassigning them later allows for dynamic adjustments based on the boss\u2019s actions. This is especially useful when facing a boss like the Threshold Warden, whose attacks change timing and damage.",
+        "explanation_rules": [
+          "Variables must be assigned numeric values for timing",
+          "Reassignment updates the stored value for future use"
+        ],
+        "explanation_prompt": "Look for keywords like \"set\", \"guard_window\", and \"recovery_time\" to identify which stats need tuning.",
+        "keywords": [
+          "guard window",
+          "recovery time"
+        ],
+        "example_code": "# Set initial guard window duration\nguard_window = 0.4  # seconds you can block\n# Set recovery time after being hit\nrecovery_time = 0.6  # seconds to recover before next attack\n# These values will be used in combat logic\n# Example: if enemy_attack <= guard_window: block!\n# Example: wait recovery_time before next move\n# Do not copy this exactly - adjust the values yourself\n# Use names like guard_window or recovery_time for clarity\n# Values must be floats (decimals) for accurate timing\n# Remember: these are just setup values for the boss fight",
+        "adaptation_reason": "The player is handling this theme reasonably well, so use a balanced challenge.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around guard window, recovery timing.",
+          "Keep the snippet focused on the exact prompt: Set the guard_window variable to 0.4 seconds and the recovery_time to 0.6 seconds before the Threshold Warden begins its"
+        ],
+        "validation_targets": [
+          "guard window",
+          "recovery timing"
+        ],
+        "pattern_id": ""
+      }
+    }
+  ],
+  "{\"boss_mechanic\": \"\", \"difficulty\": \"easy\", \"encounter_name\": \"Archive Chest\", \"encounter_style\": \"reward_puzzle\", \"interaction_type\": \"chest\", \"language\": \"python\", \"level_theme\": \"variables\", \"structure_focus\": \"two short assignments for a reward-related stat setup\", \"tutorial_mode\": false}": [
+    {
+      "created_at": "2026-05-24T17:31:16.984732+00:00",
+      "interaction_type": "chest",
+      "level_theme": "variables",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "chest",
+        "level_theme": "variables",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Combat Mode Selection",
+        "prompt": "Set up two variables to track your combat stance and recovery timing after opening this chest",
+        "gameplay_effect": "Your next attack will have a special effect based on your selected stance",
+        "syntax_rules": [
+          "Use descriptive variable names like combat_mode or recovery_time",
+          "Assign string or numeric values directly"
+        ],
+        "explanation_title": "Variables Store Gameplay Values",
+        "explanation_body": "Variables are like labeled containers that hold specific values during gameplay. In this case, you'll store a combat mode (like \"guard\" or \"aggressive\") and a recovery time (like 0.5 seconds) to control how your next attack behaves. This shows how variables can hold different types of data\u2014strings for modes and numbers for timing\u2014to influence game behavior.",
+        "explanation_rules": [
+          "Variable names should clearly indicate what kind of data they store",
+          "Assignments use = to set initial values"
+        ],
+        "explanation_prompt": "Look for keywords that describe combat states and timing values in the task",
+        "keywords": [
+          "combat stance",
+          "recovery timing"
+        ],
+        "example_code": "# Set your current combat stance\ncombat_mode = \"aggressive\"  # <--- combat stance value\n# Set how long until you recover\nrecovery_time = 0.75         # <--- recovery timing value",
+        "adaptation_reason": "The player is handling this theme reasonably well, so use a balanced challenge.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around combat mode, recovery time.",
+          "Keep the snippet focused on the exact prompt: Set up two variables to track your combat stance and recovery timing after opening this chest"
+        ],
+        "validation_targets": [
+          "combat mode",
+          "recovery time"
+        ],
+        "pattern_id": ""
+      }
+    },
+    {
+      "created_at": "2026-05-24T17:31:17.069657+00:00",
+      "interaction_type": "chest",
+      "level_theme": "variables",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "chest",
+        "level_theme": "variables",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Hint Shard Recovery",
+        "prompt": "Set the player's health and shield durability after opening the chest.",
+        "gameplay_effect": "The player gains more resilience after collecting the hint shard.",
+        "syntax_rules": [
+          "Use integer values for health and shield stats",
+          "Assign new values to variables using = operator"
+        ],
+        "explanation_title": "Variable Reassignment",
+        "explanation_body": "In this chest reward puzzle, you'll adjust the player's stats by assigning new values to variables. This shows how one variable can store different gameplay values over time. Each assignment replaces the old value with a new one, updating the player's current state.",
+        "explanation_rules": [
+          "Variables hold values that can be changed during gameplay",
+          "Assignment with = updates a variable's stored value"
+        ],
+        "explanation_prompt": "Look for keywords like 'health', 'shield', and 'set' to identify what to change",
+        "keywords": [
+          "health",
+          "shield",
+          "set"
+        ],
+        "example_code": "# Player starts with base stats\nplayer_health = 50     # health\nplayer_shield = 30     # shield durability\n# After opening chest, stats increase\nplayer_health = 75     # health increased\nplayer_shield = 45     # shield increased\n# Final stats after reward\nprint(player_health)   # 75\nprint(player_shield)   # 45",
+        "adaptation_reason": "The player is handling this theme reasonably well, so use a balanced challenge.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around health pool, shield durability.",
+          "Keep the snippet focused on the exact prompt: Set the player's health and shield durability after opening the chest."
+        ],
+        "validation_targets": [
+          "health pool",
+          "shield durability"
+        ],
+        "pattern_id": ""
+      }
+    }
+  ]
+}

@@ -9,6 +9,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 function Get-FullPath([string]$Path) {
     return [System.IO.Path]::GetFullPath($Path)
@@ -195,6 +196,29 @@ function Remove-BuildDirectory([string]$Path, [string]$Parent) {
     }
 }
 
+function Assert-ZipArchive([string]$Path) {
+    if (-not (Test-Path -LiteralPath $Path)) {
+        throw "Archive was not created: $Path"
+    }
+    if ((Get-Item -LiteralPath $Path).Length -lt 22) {
+        throw "Archive is too small to be a valid zip: $Path"
+    }
+
+    $zip = $null
+    try {
+        $zip = [System.IO.Compression.ZipFile]::OpenRead($Path)
+        if ($zip.Entries.Count -lt 1) {
+            throw "Archive has no entries: $Path"
+        }
+    } catch {
+        throw "Archive is not a valid zip: $Path"
+    } finally {
+        if ($zip) {
+            $zip.Dispose()
+        }
+    }
+}
+
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Get-FullPath (Join-Path $scriptRoot "..")
 $godotProject = Join-Path $repoRoot "godot"
@@ -245,6 +269,7 @@ if (-not $SkipExport) {
     Write-Host "Skipping Godot export by request."
     if (Test-Path -LiteralPath $archivePath) {
         Write-Host "Restoring existing exported game from: $archivePath"
+        Assert-ZipArchive $archivePath
         Expand-Archive -LiteralPath $archivePath -DestinationPath $packageDir -Force
     }
     if (-not (Test-Path -LiteralPath $gameExe)) {
@@ -291,6 +316,7 @@ if (-not $NoArchive) {
     }
     Write-Host "Creating archive: $archivePath"
     Compress-Archive -Path (Join-Path $packageDir "*") -DestinationPath $archivePath -Force
+    Assert-ZipArchive $archivePath
 
     if ($CopyToDownloads) {
         $downloadsDir = Join-Path $env:USERPROFILE "Downloads"
@@ -299,6 +325,7 @@ if (-not $NoArchive) {
         }
         $downloadArchive = Join-Path $downloadsDir "Skill-Issue-windows.zip"
         Copy-Item -LiteralPath $archivePath -Destination $downloadArchive -Force
+        Assert-ZipArchive $downloadArchive
         Write-Host "Copied archive to: $downloadArchive"
     }
 }

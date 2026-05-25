@@ -16,6 +16,11 @@ const BOSS_SPRITE_FOLDERS := {
 	"archivist": "04_archivist",
 	"system_admin": "05_system_admin",
 }
+const BOSS_SPRITE_FLOOR_VISUAL_OFFSETS := {
+	"threshold_warden": 18.0,
+	"assembly_golem": 18.0,
+	"archivist": 26.0,
+}
 const BOSS_SPRITE_ANIMATIONS := {
 	"threshold_warden": {
 		"idle": {"prefix": "idle", "fps": 6.0, "loop": true},
@@ -1397,6 +1402,8 @@ func _setup_boss_sprite() -> void:
 	if _sprites_ready and _sprite != null and is_instance_valid(_sprite) and _sprite_boss_key == boss_key:
 		_remove_legacy_visual_node(fallback_visual)
 		_purge_duplicate_boss_visuals(_sprite)
+		_sprite_base_position = _boss_sprite_base_position_from_collision()
+		_sprite.position = _sprite_base_position
 		_apply_boss_sprite_style()
 		_play_boss_visual("idle")
 		return
@@ -1423,9 +1430,26 @@ func _setup_boss_sprite() -> void:
 	_remove_legacy_visual_node(fallback_visual)
 	_purge_duplicate_boss_visuals(_sprite)
 	if _sprites_ready:
-		_sprite_base_position = _sprite.position
+		_sprite_base_position = _boss_sprite_base_position_from_collision()
+		_sprite.position = _sprite_base_position
 		_apply_boss_sprite_style()
 		_play_boss_visual("idle")
+
+
+func _boss_sprite_base_position_from_collision() -> Vector2:
+	var center_x := 0.0
+	var bottom_y := BOSS_SPRITE_CANVAS_SIZE.y * 0.5
+	if collision_shape != null and is_instance_valid(collision_shape):
+		center_x = collision_shape.position.x
+		if collision_shape.shape is RectangleShape2D:
+			var rectangle := collision_shape.shape as RectangleShape2D
+			bottom_y = collision_shape.position.y + rectangle.size.y * 0.5
+	var canvas_foot_offset := float(BOSS_SPRITE_CANVAS_SIZE.y) * 0.5 - float(BOSS_SPRITE_FOOT_MARGIN)
+	return Vector2(center_x, bottom_y - canvas_foot_offset + _boss_sprite_floor_visual_offset())
+
+
+func _boss_sprite_floor_visual_offset() -> float:
+	return float(BOSS_SPRITE_FLOOR_VISUAL_OFFSETS.get(_boss_sprite_key(), 0.0))
 
 
 func _boss_sprite_key() -> String:

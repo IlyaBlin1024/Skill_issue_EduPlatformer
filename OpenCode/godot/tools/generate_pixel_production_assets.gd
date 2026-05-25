@@ -200,26 +200,28 @@ func _draw_enemy(image: Image, kind: String, prefix: String, frame_index: int, f
 	_line(image, x + 8, robe_top + 10, x + 13, robe_top + 25, leather)
 
 	if kind == "melee":
-		var blade_raise := 0
-		if prefix.ends_with("telegraph"):
-			blade_raise = -8 - frame_index * 2
-		elif prefix.ends_with("attack"):
-			blade_raise = int(lerpf(-18.0, 12.0, t))
-			x += int(lerpf(-3.0, 8.0, t))
-		_line(image, x + 17, foot_y - 40 + bob, x + 34, foot_y - 67 + bob + blade_raise, metal)
-		_line(image, x + 18, foot_y - 39 + bob, x + 35, foot_y - 66 + bob + blade_raise, _color("#f6f2ba"))
-		_rect(image, x + 13, foot_y - 42 + bob, 9, 4, _color("#6c4422"))
+		if prefix.ends_with("telegraph") or prefix.ends_with("attack"):
+			var blade_raise := 0
+			if prefix.ends_with("telegraph"):
+				blade_raise = -8 - frame_index * 2
+			elif prefix.ends_with("attack"):
+				blade_raise = int(lerpf(-18.0, 12.0, t))
+				x += int(lerpf(-3.0, 8.0, t))
+			_line(image, x + 17, foot_y - 40 + bob, x + 34, foot_y - 67 + bob + blade_raise, metal)
+			_line(image, x + 18, foot_y - 39 + bob, x + 35, foot_y - 66 + bob + blade_raise, _color("#f6f2ba"))
+			_rect(image, x + 13, foot_y - 42 + bob, 9, 4, _color("#6c4422"))
 	else:
-		var recoil := 0
-		if prefix.ends_with("shoot"):
-			recoil = int(lerpf(4.0, -6.0, t))
-		elif prefix.ends_with("telegraph"):
-			recoil = -frame_index
-		_line(image, x + 15 + recoil, foot_y - 39 + bob, x + 34 + recoil, foot_y - 43 + bob, _color("#203a63"))
-		_line(image, x + 15 + recoil, foot_y - 38 + bob, x + 34 + recoil, foot_y - 42 + bob, accent)
-		_diamond(image, x + 36 + recoil, foot_y - 43 + bob, 5, accent)
-		if prefix.ends_with("shoot") and frame_index >= 2:
-			_diamond(image, x + 43 + frame_index * 2, foot_y - 43 + bob, 3, _color("#ffd56a", 0.82))
+		if prefix.ends_with("telegraph") or prefix.ends_with("shoot"):
+			var recoil := 0
+			if prefix.ends_with("shoot"):
+				recoil = int(lerpf(4.0, -6.0, t))
+			elif prefix.ends_with("telegraph"):
+				recoil = -frame_index
+			_line(image, x + 15 + recoil, foot_y - 39 + bob, x + 34 + recoil, foot_y - 43 + bob, _color("#203a63"))
+			_line(image, x + 15 + recoil, foot_y - 38 + bob, x + 34 + recoil, foot_y - 42 + bob, accent)
+			_diamond(image, x + 36 + recoil, foot_y - 43 + bob, 5, accent)
+			if prefix.ends_with("shoot") and frame_index >= 2:
+				_diamond(image, x + 43 + frame_index * 2, foot_y - 43 + bob, 3, _color("#ffd56a", 0.82))
 		if prefix.ends_with("jump_back"):
 			_line(image, x - 14, foot_y - 18 + bob, x - 30, foot_y - 8 + bob, _color("#8be9ff", 0.7))
 

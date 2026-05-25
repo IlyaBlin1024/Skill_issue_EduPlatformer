@@ -15,6 +15,12 @@ const ROOM_HEIGHT := 1080
 const FLOOR_TOP_Y := 984.0
 const PLAYER_HALF_HEIGHT := 24.0
 const BOSS_HALF_HEIGHT := 75.0
+const SOLID_GEOMETRY_LAYER := 1
+const ONE_WAY_GEOMETRY_LAYER := 2
+const ONE_WAY_PLATFORM_COLLISION_HEIGHT := 10.0
+const ONE_WAY_PLATFORM_MARGIN := 2.0
+const FLOOR_TEXTURE_OPAQUE_TOP_FALLBACK := 20.0
+const PLATFORM_TEXTURE_OPAQUE_TOP_FALLBACK := 26.0
 const COMBAT_PROJECTILE_SCRIPT := preload("res://scripts/enemy_projectile.gd")
 const PAUSE_MENU_SCENE := preload("res://scenes/ui/pause_menu.tscn")
 const INVENTORY_MENU_SCENE := preload("res://scenes/ui/inventory_menu.tscn")
@@ -103,6 +109,7 @@ var _arena_floor_texture: Texture2D = null
 var _arena_platform_texture: Texture2D = null
 var _arena_foreground_texture: Texture2D = null
 var _arena_hazard_texture: Texture2D = null
+var _pause_shortcut_down := false
 var _messages := {
 	"intro": "Boss chamber reached. Reprogram and defeat the Threshold Warden.",
 	"defeat": "Knight integrity lost. Respawning...",
@@ -114,9 +121,15 @@ var _messages := {
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	set_process_input(true)
+	set_process_unhandled_input(true)
+	set_process_unhandled_key_input(true)
+	set_process_shortcut_input(true)
 	if not GameState.pending_level_path.is_empty():
 		level_config_path = GameState.pending_level_path
+	_configure_arena_collision_bodies()
 	_apply_boss_config(_load_level_config())
+	_configure_combatant_contact()
 	_hide_legacy_dialogue_layer()
 	dialogue_box.hide_box()
 	dialogue_box.visible = false
@@ -158,6 +171,11 @@ func _ready() -> void:
 	call_deferred("_run_boss_room_intro_sequence")
 
 
+func _process(_delta: float) -> void:
+	_enforce_terminal_pause_state()
+	_poll_overlay_shortcuts()
+
+
 func _input(event: InputEvent) -> void:
 	if _handle_overlay_shortcut(event):
 		return
@@ -172,20 +190,27 @@ func _unhandled_input(event: InputEvent) -> void:
 	_handle_overlay_shortcut(event)
 
 
+func _unhandled_key_input(event: InputEvent) -> void:
+	_handle_overlay_shortcut(event)
+
+
+func _shortcut_input(event: InputEvent) -> void:
+	_handle_overlay_shortcut(event)
+
+
 func _handle_overlay_shortcut(event: InputEvent) -> bool:
-	if _dialogue_active or terminal.visible:
-		return false
-	if event.is_action_pressed("ui_cancel"):
+	if _is_pause_shortcut(event):
 		_toggle_pause_menu()
+		_pause_shortcut_down = true
 		get_viewport().set_input_as_handled()
 		return true
+	if _terminal_is_open():
+		return false
+	if _dialogue_active:
+		return false
 	if event is InputEventKey:
 		var key_event := event as InputEventKey
 		if key_event.pressed and not key_event.echo:
-			if key_event.keycode == KEY_ESCAPE or key_event.keycode == KEY_P:
-				_toggle_pause_menu()
-				get_viewport().set_input_as_handled()
-				return true
 			if key_event.keycode == KEY_I:
 				_toggle_inventory_menu()
 				get_viewport().set_input_as_handled()
@@ -193,11 +218,60 @@ func _handle_overlay_shortcut(event: InputEvent) -> bool:
 	return false
 
 
+func _poll_overlay_shortcuts() -> void:
+	var shortcut_down := _pause_shortcut_currently_down()
+	if not shortcut_down:
+		_pause_shortcut_down = false
+		return
+	if _pause_shortcut_down:
+		return
+	_toggle_pause_menu()
+	_pause_shortcut_down = true
+
+
+func _pause_shortcut_currently_down() -> bool:
+	return (
+		Input.is_action_pressed("ui_cancel")
+		or Input.is_key_pressed(KEY_ESCAPE)
+		or Input.is_key_pressed(KEY_P)
+	)
+
+
+func _is_pause_shortcut(event: InputEvent) -> bool:
+	if event.is_action_pressed("ui_cancel"):
+		return true
+	if not (event is InputEventKey):
+		return false
+	var key_event := event as InputEventKey
+	if not key_event.pressed or key_event.echo:
+		return false
+	return (
+		key_event.keycode == KEY_ESCAPE
+		or key_event.keycode == KEY_P
+		or key_event.physical_keycode == KEY_ESCAPE
+		or key_event.physical_keycode == KEY_P
+	)
+
+
+func _terminal_is_open() -> bool:
+	if terminal == null:
+		return false
+	if terminal.has_method("is_terminal_open"):
+		return bool(terminal.call("is_terminal_open"))
+	var panel: Control = terminal.get_node_or_null("Panel") as Control
+	return panel != null and panel.visible
+
+
 func _ensure_overlay_menus() -> void:
 	if _pause_menu == null:
+		_pause_menu = get_node_or_null("PauseMenu") as CanvasLayer
+	if _pause_menu == null:
 		_pause_menu = PAUSE_MENU_SCENE.instantiate() as CanvasLayer
+		_pause_menu.name = "PauseMenu"
 		_pause_menu.process_mode = Node.PROCESS_MODE_ALWAYS
 		add_child(_pause_menu)
+	_pause_menu.layer = 1000
+	_pause_menu.process_mode = Node.PROCESS_MODE_ALWAYS
 	if _inventory_menu == null:
 		_inventory_menu = INVENTORY_MENU_SCENE.instantiate() as CanvasLayer
 		_inventory_menu.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -205,10 +279,35 @@ func _ensure_overlay_menus() -> void:
 
 
 func _toggle_pause_menu() -> void:
-	if get_tree().paused and (_pause_menu == null or not _pause_menu.visible):
+	if _pause_menu_is_open():
+		_close_pause_menu()
+	else:
+		_open_pause_menu()
+
+
+func _pause_menu_is_open() -> bool:
+	return _pause_menu != null and _pause_menu.visible
+
+
+func _open_pause_menu() -> void:
+	_ensure_overlay_menus()
+	if _pause_menu == null:
 		return
-	if _pause_menu != null and _pause_menu.has_method("toggle_pause"):
-		_pause_menu.call("toggle_pause")
+	_pause_menu.layer = 1000
+	_pause_menu.process_mode = Node.PROCESS_MODE_ALWAYS
+	if _pause_menu.has_method("open_pause"):
+		_pause_menu.call("open_pause")
+	_pause_menu.visible = true
+	get_tree().paused = true
+
+
+func _close_pause_menu() -> void:
+	if _pause_menu == null:
+		return
+	if _pause_menu.has_method("close_pause"):
+		_pause_menu.call("close_pause")
+	_pause_menu.visible = false
+	get_tree().paused = _terminal_is_open()
 
 
 func _toggle_inventory_menu() -> void:
@@ -216,6 +315,15 @@ func _toggle_inventory_menu() -> void:
 		return
 	if _inventory_menu != null and _inventory_menu.has_method("toggle_inventory"):
 		_inventory_menu.call("toggle_inventory")
+
+
+func _enforce_terminal_pause_state() -> void:
+	if not _terminal_is_open():
+		return
+	if _pause_menu != null and _pause_menu.visible:
+		return
+	if not get_tree().paused:
+		get_tree().paused = true
 
 
 func _load_level_config() -> Dictionary:
@@ -302,16 +410,23 @@ func _apply_boss_arena_layout(boss_config: Dictionary, _environment_config: Dict
 	var platform_entries: Array = platform_entries_variant
 	var shapes: Array[CollisionShape2D] = [platform_a_shape, platform_b_shape, platform_c_shape, platform_d_shape, platform_e_shape]
 	var visuals: Array[ColorRect] = [platform_a_visual, platform_b_visual, platform_c_visual, platform_d_visual, platform_e_visual]
-	for index in range(min(platform_entries.size(), shapes.size())):
+	for index in range(shapes.size()):
+		if index >= platform_entries.size():
+			_apply_platform_entry(shapes[index], visuals[index], {"visible": false})
+			continue
 		var entry_variant: Variant = platform_entries[index]
 		if typeof(entry_variant) != TYPE_DICTIONARY:
+			_apply_platform_entry(shapes[index], visuals[index], {"visible": false})
 			continue
 		_apply_platform_entry(shapes[index], visuals[index], entry_variant as Dictionary)
 	_align_arena_static_visuals_to_collision()
 
 
 func _apply_platform_entry(shape_node: CollisionShape2D, visual_node: ColorRect, entry: Dictionary) -> void:
+	if shape_node == null or visual_node == null:
+		return
 	var is_visible: bool = bool(entry.get("visible", true))
+	_configure_static_collision_body(shape_node, ONE_WAY_GEOMETRY_LAYER, true)
 	shape_node.disabled = not is_visible
 	visual_node.visible = is_visible
 	if not is_visible:
@@ -320,17 +435,20 @@ func _apply_platform_entry(shape_node: CollisionShape2D, visual_node: ColorRect,
 	var platform_height: float = float(entry.get("height", 28.0))
 	var platform_x: float = float(entry.get("x", 960.0))
 	var platform_y: float = float(entry.get("y", 640.0))
-	var collision_height: float = maxf(10.0, platform_height)
-	if shape_node.shape is RectangleShape2D:
-		(shape_node.shape as RectangleShape2D).size = Vector2(platform_width, collision_height)
-	shape_node.position = Vector2(platform_x, platform_y)
-	shape_node.one_way_collision_margin = 0.0
-	visual_node.offset_left = platform_x - platform_width * 0.5
-	visual_node.offset_top = platform_y - platform_height * 0.5
-	visual_node.offset_right = platform_x + platform_width * 0.5
-	visual_node.offset_bottom = platform_y + platform_height * 0.5
+	var collision_height: float = minf(platform_height, ONE_WAY_PLATFORM_COLLISION_HEIGHT)
+	_configure_rect_body(
+		shape_node,
+		visual_node,
+		Vector2(platform_x, platform_y),
+		Vector2(platform_width, platform_height),
+		ONE_WAY_GEOMETRY_LAYER,
+		true,
+		collision_height
+	)
+	shape_node.one_way_collision = true
+	shape_node.one_way_collision_margin = ONE_WAY_PLATFORM_MARGIN
 	if _arena_platform_texture != null:
-		_set_texture_overlay(visual_node, _arena_platform_texture, true)
+		_set_surface_texture_overlay(visual_node, _arena_platform_texture, true, PLATFORM_TEXTURE_OPAQUE_TOP_FALLBACK)
 	_resize_texture_overlays(visual_node)
 
 
@@ -352,13 +470,13 @@ func _apply_boss_arena_textures() -> void:
 	if _arena_foreground_texture != null:
 		_set_named_texture_overlay(backdrop, "ForegroundProps", _arena_foreground_texture, false)
 	if _arena_floor_texture != null:
-		_set_texture_overlay(floor_visual, _arena_floor_texture, true)
+		_set_surface_texture_overlay(floor_visual, _arena_floor_texture, true, FLOOR_TEXTURE_OPAQUE_TOP_FALLBACK)
 		_set_texture_overlay(ceiling_visual, _arena_floor_texture, true)
 		_set_texture_overlay(left_wall_visual, _arena_floor_texture, true)
 		_set_texture_overlay(right_wall_visual, _arena_floor_texture, true)
 	for platform_visual in [platform_a_visual, platform_b_visual, platform_c_visual, platform_d_visual, platform_e_visual]:
 		if platform_visual is Control and _arena_platform_texture != null:
-			_set_texture_overlay(platform_visual as Control, _arena_platform_texture, true)
+			_set_surface_texture_overlay(platform_visual as Control, _arena_platform_texture, true, PLATFORM_TEXTURE_OPAQUE_TOP_FALLBACK)
 
 
 func _load_texture(path: String) -> Texture2D:
@@ -367,8 +485,120 @@ func _load_texture(path: String) -> Texture2D:
 	return ResourceLoader.load(path) as Texture2D
 
 
+func _configure_arena_collision_bodies() -> void:
+	_configure_rect_body(
+		floor_shape,
+		floor_visual,
+		Vector2(ROOM_WIDTH * 0.5, FLOOR_TOP_Y + 48.0),
+		Vector2(ROOM_WIDTH, 96.0),
+		SOLID_GEOMETRY_LAYER,
+		false
+	)
+	_configure_rect_body(
+		ceiling_shape,
+		ceiling_visual,
+		Vector2(ROOM_WIDTH * 0.5, 48.0),
+		Vector2(ROOM_WIDTH, 96.0),
+		SOLID_GEOMETRY_LAYER,
+		false
+	)
+	_configure_rect_body(
+		left_wall_shape,
+		left_wall_visual,
+		Vector2(24.0, ROOM_HEIGHT * 0.5),
+		Vector2(48.0, ROOM_HEIGHT),
+		SOLID_GEOMETRY_LAYER,
+		false
+	)
+	_configure_rect_body(
+		right_wall_shape,
+		right_wall_visual,
+		Vector2(ROOM_WIDTH - 24.0, ROOM_HEIGHT * 0.5),
+		Vector2(48.0, ROOM_HEIGHT),
+		SOLID_GEOMETRY_LAYER,
+		false
+	)
+	for platform_shape in [platform_a_shape, platform_b_shape, platform_c_shape, platform_d_shape, platform_e_shape]:
+		_configure_static_collision_body(platform_shape as CollisionShape2D, ONE_WAY_GEOMETRY_LAYER, true)
+
+
+func _configure_combatant_contact() -> void:
+	player.safe_margin = 0.0
+	boss.safe_margin = 0.0
+
+
+func _configure_rect_body(
+	shape_node: CollisionShape2D,
+	visual_node: ColorRect,
+	center: Vector2,
+	visual_size: Vector2,
+	layer: int,
+	one_way: bool,
+	collision_height: float = -1.0
+) -> void:
+	if shape_node == null:
+		return
+	_configure_static_collision_body(shape_node, layer, one_way)
+	var body := shape_node.get_parent() as StaticBody2D
+	if body != null:
+		body.position = center
+	var safe_collision_height := visual_size.y if collision_height <= 0.0 else collision_height
+	var collision_size := Vector2(visual_size.x, safe_collision_height)
+	_set_rectangle_shape_size(shape_node, collision_size)
+	shape_node.position = Vector2(0.0, -visual_size.y * 0.5 + safe_collision_height * 0.5) if one_way else Vector2.ZERO
+	_set_control_rect(visual_node, -visual_size * 0.5, visual_size)
+
+
+func _configure_static_collision_body(shape_node: CollisionShape2D, layer: int, one_way: bool) -> void:
+	if shape_node == null:
+		return
+	var body := shape_node.get_parent() as StaticBody2D
+	if body != null:
+		body.add_to_group("level_geometry")
+		body.collision_layer = layer
+		body.collision_mask = 0
+	shape_node.one_way_collision = one_way
+	shape_node.one_way_collision_margin = ONE_WAY_PLATFORM_MARGIN if one_way else 0.0
+
+
+func _set_rectangle_shape_size(shape_node: CollisionShape2D, rect_size: Vector2) -> void:
+	if shape_node == null:
+		return
+	var rectangle := shape_node.shape as RectangleShape2D
+	if rectangle == null:
+		rectangle = RectangleShape2D.new()
+	else:
+		rectangle = rectangle.duplicate() as RectangleShape2D
+	rectangle.size = rect_size
+	shape_node.shape = rectangle
+
+
+func _set_control_rect(control: Control, position: Vector2, rect_size: Vector2) -> void:
+	if control == null:
+		return
+	control.position = position
+	control.size = rect_size
+	control.offset_left = position.x
+	control.offset_top = position.y
+	control.offset_right = position.x + rect_size.x
+	control.offset_bottom = position.y + rect_size.y
+	_resize_texture_overlays(control)
+
+
 func _set_texture_overlay(control: Control, texture: Texture2D, tile: bool) -> void:
 	_set_named_texture_overlay(control, "ProductionTexture", texture, tile)
+
+
+func _set_surface_texture_overlay(control: Control, texture: Texture2D, tile: bool, fallback_opaque_top: float = 0.0) -> void:
+	_set_named_texture_overlay(control, "ProductionTexture", texture, tile)
+	var texture_rect := control.get_node_or_null("ProductionTexture") as TextureRect
+	if texture_rect == null:
+		return
+	var opaque_top := _texture_opaque_top(texture)
+	if opaque_top <= 0.0:
+		opaque_top = fallback_opaque_top
+	texture_rect.set_meta("opaque_top_offset", opaque_top)
+	_resize_texture_overlays(control)
 
 
 func _set_named_texture_overlay(control: Control, overlay_name: String, texture: Texture2D, tile: bool) -> void:
@@ -392,38 +622,45 @@ func _set_named_texture_overlay(control: Control, overlay_name: String, texture:
 	texture_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 
+func _texture_opaque_top(texture: Texture2D) -> float:
+	if texture == null:
+		return 0.0
+	var image := texture.get_image()
+	if image == null:
+		return 0.0
+	if image.get_format() != Image.FORMAT_RGBA8:
+		image.convert(Image.FORMAT_RGBA8)
+	var used_rect := image.get_used_rect()
+	if used_rect.size.x <= 0 or used_rect.size.y <= 0:
+		return 0.0
+	return float(maxi(used_rect.position.y, 0))
+
+
 func _align_arena_static_visuals_to_collision() -> void:
 	_sync_visual_to_collision(floor_shape, floor_visual)
 	_sync_visual_to_collision(ceiling_shape, ceiling_visual)
 	_sync_visual_to_collision(left_wall_shape, left_wall_visual)
 	_sync_visual_to_collision(right_wall_shape, right_wall_visual)
-	for pair in [
-		[platform_a_shape, platform_a_visual],
-		[platform_b_shape, platform_b_visual],
-		[platform_c_shape, platform_c_visual],
-		[platform_d_shape, platform_d_visual],
-		[platform_e_shape, platform_e_visual],
-	]:
-		_sync_visual_to_collision(pair[0] as CollisionShape2D, pair[1] as ColorRect)
+	for platform_visual in [platform_a_visual, platform_b_visual, platform_c_visual, platform_d_visual, platform_e_visual]:
+		_resize_texture_overlays(platform_visual as Control)
 
 
 func _sync_visual_to_collision(shape_node: CollisionShape2D, visual_node: ColorRect) -> void:
 	if shape_node == null or visual_node == null or not (shape_node.shape is RectangleShape2D):
 		return
 	var rect_size: Vector2 = (shape_node.shape as RectangleShape2D).size
-	visual_node.offset_left = shape_node.position.x - rect_size.x * 0.5
-	visual_node.offset_top = shape_node.position.y - rect_size.y * 0.5
-	visual_node.offset_right = shape_node.position.x + rect_size.x * 0.5
-	visual_node.offset_bottom = shape_node.position.y + rect_size.y * 0.5
-	_resize_texture_overlays(visual_node)
+	_set_control_rect(visual_node, shape_node.position - rect_size * 0.5, rect_size)
 
 
 func _resize_texture_overlays(control: Control) -> void:
 	for child in control.get_children():
 		if child is TextureRect:
 			var texture_rect := child as TextureRect
-			texture_rect.position = Vector2.ZERO
-			texture_rect.size = control.size
+			var opaque_top_offset := 0.0
+			if texture_rect.has_meta("opaque_top_offset"):
+				opaque_top_offset = float(texture_rect.get_meta("opaque_top_offset"))
+			texture_rect.position = Vector2(0.0, -opaque_top_offset)
+			texture_rect.size = Vector2(control.size.x, control.size.y + opaque_top_offset)
 
 
 func _default_arena_layout_for_mechanic(mechanic_type: String) -> Dictionary:
@@ -434,11 +671,11 @@ func _default_arena_layout_for_mechanic(mechanic_type: String) -> Dictionary:
 				"mist_bottom": 910.0,
 				"mist_alpha": 0.18,
 				"platforms": [
-					{"x": 280.0, "y": 860.0, "width": 220.0},
-					{"x": 560.0, "y": 620.0, "width": 170.0},
-					{"x": 960.0, "y": 710.0, "width": 290.0},
-					{"x": 1360.0, "y": 620.0, "width": 170.0},
-					{"x": 1640.0, "y": 860.0, "width": 220.0}
+					{"x": 280.0, "y": 820.0, "width": 220.0},
+					{"x": 560.0, "y": 735.0, "width": 170.0},
+					{"x": 960.0, "y": 650.0, "width": 290.0},
+					{"x": 1360.0, "y": 735.0, "width": 170.0},
+					{"x": 1640.0, "y": 820.0, "width": 220.0}
 				]
 			}
 		"assembly_golem":
@@ -447,11 +684,11 @@ func _default_arena_layout_for_mechanic(mechanic_type: String) -> Dictionary:
 				"mist_bottom": 928.0,
 				"mist_alpha": 0.16,
 				"platforms": [
-					{"x": 250.0, "y": 892.0, "width": 210.0},
-					{"x": 560.0, "y": 760.0, "width": 180.0},
-					{"x": 960.0, "y": 640.0, "width": 220.0},
-					{"x": 1360.0, "y": 760.0, "width": 180.0},
-					{"x": 1670.0, "y": 892.0, "width": 210.0}
+					{"x": 250.0, "y": 820.0, "width": 210.0},
+					{"x": 560.0, "y": 735.0, "width": 180.0},
+					{"x": 960.0, "y": 650.0, "width": 220.0},
+					{"x": 1360.0, "y": 735.0, "width": 180.0},
+					{"x": 1670.0, "y": 820.0, "width": 210.0}
 				]
 			}
 		"archivist":
@@ -460,11 +697,11 @@ func _default_arena_layout_for_mechanic(mechanic_type: String) -> Dictionary:
 				"mist_bottom": 900.0,
 				"mist_alpha": 0.12,
 				"platforms": [
-					{"x": 300.0, "y": 850.0, "width": 250.0},
-					{"x": 680.0, "y": 640.0, "width": 230.0},
-					{"x": 960.0, "y": 500.0, "width": 320.0},
-					{"x": 1240.0, "y": 640.0, "width": 230.0},
-					{"x": 1620.0, "y": 850.0, "width": 250.0}
+					{"x": 300.0, "y": 820.0, "width": 250.0},
+					{"x": 680.0, "y": 735.0, "width": 230.0},
+					{"x": 960.0, "y": 650.0, "width": 320.0},
+					{"x": 1240.0, "y": 735.0, "width": 230.0},
+					{"x": 1620.0, "y": 820.0, "width": 250.0}
 				]
 			}
 		"system_admin":
@@ -473,11 +710,11 @@ func _default_arena_layout_for_mechanic(mechanic_type: String) -> Dictionary:
 				"mist_bottom": 930.0,
 				"mist_alpha": 0.17,
 				"platforms": [
-					{"x": 250.0, "y": 880.0, "width": 210.0},
-					{"x": 620.0, "y": 690.0, "width": 210.0},
-					{"x": 960.0, "y": 520.0, "width": 260.0},
-					{"x": 1300.0, "y": 690.0, "width": 210.0},
-					{"x": 1670.0, "y": 880.0, "width": 210.0}
+					{"x": 250.0, "y": 820.0, "width": 210.0},
+					{"x": 620.0, "y": 735.0, "width": 210.0},
+					{"x": 960.0, "y": 650.0, "width": 260.0},
+					{"x": 1300.0, "y": 735.0, "width": 210.0},
+					{"x": 1670.0, "y": 820.0, "width": 210.0}
 				]
 			}
 		_:
@@ -486,11 +723,11 @@ func _default_arena_layout_for_mechanic(mechanic_type: String) -> Dictionary:
 				"mist_bottom": 930.0,
 				"mist_alpha": 0.14,
 				"platforms": [
-					{"x": 300.0, "y": 848.0, "width": 230.0},
-					{"x": 630.0, "y": 720.0, "width": 210.0},
-					{"x": 960.0, "y": 582.0, "width": 260.0},
-					{"x": 1290.0, "y": 720.0, "width": 210.0},
-					{"x": 1620.0, "y": 848.0, "width": 230.0}
+					{"x": 300.0, "y": 820.0, "width": 230.0},
+					{"x": 630.0, "y": 735.0, "width": 210.0},
+					{"x": 960.0, "y": 650.0, "width": 260.0},
+					{"x": 1290.0, "y": 735.0, "width": 210.0},
+					{"x": 1620.0, "y": 820.0, "width": 230.0}
 				]
 			}
 
@@ -1075,19 +1312,25 @@ func _should_use_q_for_boss_parry() -> bool:
 
 
 func _snap_combatants_to_floor() -> void:
-	var player_half_height := PLAYER_HALF_HEIGHT
-	if is_instance_valid(player_collision_shape) and player_collision_shape.shape is RectangleShape2D:
-		player_half_height = (player_collision_shape.shape as RectangleShape2D).size.y * 0.5
-	var boss_half_height := BOSS_HALF_HEIGHT
-	if is_instance_valid(boss_collision_shape) and boss_collision_shape.shape is RectangleShape2D:
-		boss_half_height = (boss_collision_shape.shape as RectangleShape2D).size.y * 0.5
 	var floor_top_y := _floor_top_y()
-	player.global_position = Vector2(_boss_arena_spawn.x, floor_top_y - player_half_height)
-	boss.global_position = Vector2(boss.global_position.x, floor_top_y - boss_half_height)
+	player.global_position = Vector2(
+		_boss_arena_spawn.x,
+		floor_top_y - _collision_bottom_offset(player_collision_shape, PLAYER_HALF_HEIGHT)
+	)
+	boss.global_position = Vector2(
+		boss.global_position.x,
+		floor_top_y - _collision_bottom_offset(boss_collision_shape, BOSS_HALF_HEIGHT)
+	)
 	player.velocity = Vector2.ZERO
 	boss.velocity = Vector2.ZERO
 	player.apply_floor_snap()
 	boss.apply_floor_snap()
+
+
+func _collision_bottom_offset(shape_node: CollisionShape2D, fallback_half_height: float) -> float:
+	if is_instance_valid(shape_node) and shape_node.shape is RectangleShape2D:
+		return shape_node.position.y + (shape_node.shape as RectangleShape2D).size.y * 0.5
+	return fallback_half_height
 
 
 func _floor_top_y() -> float:
