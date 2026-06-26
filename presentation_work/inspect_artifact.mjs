@@ -1,0 +1,11 @@
+const artifact = await import("@oai/artifact-tool");
+const jsx = await import("@oai/artifact-tool/presentation-jsx");
+console.log("artifact exports", Object.keys(artifact).sort().join(", "));
+console.log("jsx exports", Object.keys(jsx).sort().join(", "));
+console.log("PresentationFile static", Object.getOwnPropertyNames(artifact.PresentationFile).join(", "));
+console.log("Presentation prototype", Object.getOwnPropertyNames(artifact.Presentation.prototype).join(", "));
+console.log("Slide prototype", Object.getOwnPropertyNames(artifact.Slide.prototype).join(", "));
+console.log("shape fn", artifact.shape.toString().slice(0, 500));
+console.log("panel fn", artifact.panel.toString().slice(0, 500));
+console.log("image fn", artifact.image.toString().slice(0, 400));
+console.log("chart fn", artifact.chart.toString().slice(0, 400));

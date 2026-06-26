@@ -281,7 +281,7 @@
   ],
   "{\"boss_mechanic\": \"Combine values, branches, loops and functions across shifting phases.\", \"difficulty\": \"easy\", \"encounter_name\": \"System Admin\", \"encounter_style\": \"system_admin\", \"interaction_type\": \"boss\", \"language\": \"python\", \"level_theme\": \"integration\", \"structure_focus\": \"boss opening plan with a compact mixed tactic that still stays readable\", \"tutorial_mode\": false}": [
     {
-      "created_at": "2026-05-23T15:38:45.589709+00:00",
+      "created_at": "2026-05-30T11:17:22.509948+00:00",
       "interaction_type": "boss",
       "level_theme": "integration",
       "difficulty": "easy",
@@ -293,40 +293,41 @@
         "generation_source": "ai",
         "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
         "title": "Boss Phase Integration",
-        "prompt": "Design a compact opening plan that combines attack damage, movement speed, and shield durability into one readable tactic for the System Admin boss.",
-        "gameplay_effect": "Your opening plan will determine how well your initial strategy adapts through the boss's shifting phases.",
+        "prompt": "Design a compact tactic that combines movement speed, damage output, and shield timing into one opening plan for the System Admin boss.",
+        "gameplay_effect": "Your opening tactic must survive all three system phases while maintaining consistent damage and defense.",
         "syntax_rules": [
-          "Use clear variable names like attack_power, move_speed, or shield_durability",
-          "Combine these stats into a single tactic function that returns a prepared plan"
+          "Use functions to group related actions like attack() and defend()",
+          "Combine conditional branches (if/elif/else) to respond to boss states",
+          "Keep your code readable even when mixing multiple constructs"
         ],
-        "explanation_title": "Integrating Combat Stats",
-        "explanation_body": "Integration in combat means merging different stats like attack power, movement speed, and shield strength into a unified approach. This helps you adapt quickly during the boss's changing phases. Instead of handling each stat separately, combine them logically into one readable tactic that works across all situations.",
+        "explanation_title": "Combining Mechanics for Boss Tactics",
+        "explanation_body": "When building tactics for the System Admin boss, you must blend core mechanics\u2014like changing movement speed based on phase, adjusting damage depending on shield status, and timing defensive actions\u2014into a single readable plan. This requires choosing only the right tools to support your strategy, not just throwing everything together. Each part should have a clear role in the overall flow.",
         "explanation_rules": [
-          "Keep variable names descriptive and consistent with gameplay terms",
-          "Ensure your tactic function returns a clear, organized plan"
+          "Only include logic that directly supports your boss plan",
+          "Maintain clarity by grouping actions into logical blocks"
         ],
-        "explanation_prompt": "Look for how multiple stats are combined into one cohesive opening strategy",
+        "explanation_prompt": "Look for keywords like movement speed, damage output, and shield timing in the task to identify which gameplay elements to integrate.",
         "keywords": [
+          "movement speed",
+          "damage output",
+          "shield timing"
+        ],
+        "example_code": "# Example: Compact tactic combining movement, damage, and shield\ndef boss_tactic():\n    # Movement speed changes per phase\n    if phase == 1:\n        move_speed = 3\n    elif phase == 2:\n        move_speed = 5\n    else:\n        move_speed = 2\n\n    # Damage output depends on shield state\n    if shield_active:\n        damage = 10\n    else:\n        damage = 20\n\n    # Shield timing uses a loop to check readiness\n    for i in range(3):\n        if shield_cooldown <= 0:\n            activate_shield()\n\n    return move_speed, damage, shield_active\n# End of example",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around attack damage, movement speed, shield durability.",
+          "Keep the snippet focused on the exact prompt: Design a compact tactic that combines movement speed, damage output, and shield timing into one opening plan for the Sys"
+        ],
+        "validation_targets": [
           "attack damage",
           "movement speed",
           "shield durability"
-        ],
-        "example_code": "# Plan for System Admin boss\ndef opening_tactic():\n    # attack_damage = 50\n    # move_speed = 30\n    # shield_durability = 70\n    return {\n        \"attack\": 50,\n        \"speed\": 30,\n        \"shield\": 70\n    }\n# This tactic integrates all core stats into one readable package",
-        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
-        "fallback_hints": [
-          "Map the task wording to code concepts around attack power, move speed, shield strength.",
-          "Keep the snippet focused on the exact prompt: Design a compact opening plan that combines attack damage, movement speed, and shield durability into one readable tacti"
-        ],
-        "validation_targets": [
-          "attack power",
-          "move speed",
-          "shield strength"
         ],
         "pattern_id": ""
       }
     },
     {
-      "created_at": "2026-05-23T16:46:37.239565+00:00",
+      "created_at": "2026-05-30T11:18:08.759898+00:00",
       "interaction_type": "boss",
       "level_theme": "integration",
       "difficulty": "easy",
@@ -338,34 +339,34 @@
         "generation_source": "ai",
         "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
         "title": "Boss Phase Integration",
-        "prompt": "Design a compact opening tactic that combines branching logic, looping damage, and a function call to survive the first system phase",
-        "gameplay_effect": "Your opening plan must adapt to system shifts while maintaining consistent damage output",
+        "prompt": "Create a compact boss battle plan that combines damage calculation, health tracking, and phase switching logic into one readable function",
+        "gameplay_effect": "Your boss fight tactic will smoothly transition between phases while maintaining clear damage and health states",
         "syntax_rules": [
-          "Use if/elif/else to handle different system states",
-          "Implement a for loop to apply repeated damage effects",
-          "Define a function to encapsulate a core damage pattern"
+          "Use def to define your main tactic function",
+          "Combine if/elif/else for phase transitions",
+          "Use variables like attack_damage, boss_health, and phase_count"
         ],
-        "explanation_title": "Combining Constructs for Boss Tactics",
-        "explanation_body": "When building boss tactics, you must choose which programming constructs truly support your gameplay goals. Branching lets you react to system changes, loops let you apply consistent pressure, and functions let you reuse reliable patterns. Not every construct needs to be used\u2014only those that improve readability and gameplay effectiveness. This balance keeps your code both functional and maintainable during complex encounters.",
+        "explanation_title": "Combining Logic in Boss Fights",
+        "explanation_body": "In boss battles, you often need to mix different systems like damage calculation, health tracking, and phase management into a single readable tactic. This requires organizing your code so each part contributes clearly to the overall strategy. The key is to keep variable names descriptive and logic flow straightforward, even when combining multiple systems.",
         "explanation_rules": [
-          "Only use constructs that directly support gameplay flow",
-          "Keep logic readable even when combining multiple elements"
+          "Keep related gameplay concepts grouped logically",
+          "Use clear variable names that reflect their role in the boss fight"
         ],
-        "explanation_prompt": "Look for keywords like system states, repeated damage, and core patterns to identify where to place each construct",
+        "explanation_prompt": "Look for how multiple gameplay elements are layered into one boss plan",
         "keywords": [
-          "system states",
-          "repeated damage",
-          "core pattern"
+          "damage calculation",
+          "health tracking",
+          "phase switching"
         ],
-        "example_code": "# Damage function for consistent attacks\ndef core_damage():\n    # This function handles the base damage pattern\n    return 10\n\n# Main tactic logic\nsystem_state = \"normal\"  # Could be \"alert\", \"critical\", etc.\n\nif system_state == \"normal\":\n    # Standard damage loop\n    for i in range(3):\n        print(\"Attacking with\", core_damage(), \"damage\")\nelif system_state == \"alert\":\n    # Adjusted damage loop\n    for i in range(5):\n        print(\"Attacking with\", core_damage() * 2, \"damage\")",
+        "example_code": "def boss_tactic(phase_count, boss_health):\n    # damage calculation\n    attack_damage = 10 + (phase_count * 5)\n    # health tracking\n    if boss_health > 50:\n        phase = \"normal\"\n    elif boss_health > 20:\n        phase = \"aggressive\"\n    else:\n        phase = \"final\"\n    # phase switching logic\n    if phase == \"final\":\n        attack_damage *= 2\n    return attack_damage, phase\n    # This tactic keeps all systems readable in one function",
         "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
         "fallback_hints": [
-          "Map the task wording to code concepts around system adaptation, damage consistency.",
-          "Keep the snippet focused on the exact prompt: Design a compact opening tactic that combines branching logic, looping damage, and a function call to survive the first "
+          "Map the task wording to code concepts around attack damage, boss health.",
+          "Keep the snippet focused on the exact prompt: Create a compact boss battle plan that combines damage calculation, health tracking, and phase switching logic into one "
         ],
         "validation_targets": [
-          "system adaptation",
-          "damage consistency"
+          "attack damage",
+          "boss health"
         ],
         "pattern_id": ""
       }
@@ -821,6 +822,187 @@
         "validation_targets": [
           "health pool",
           "shield durability"
+        ],
+        "pattern_id": ""
+      }
+    }
+  ],
+  "{\"boss_mechanic\": \"Combine values, branches, loops and functions across shifting phases.\", \"difficulty\": \"easy\", \"encounter_name\": \"System Admin\", \"encounter_style\": \"system_admin\", \"interaction_type\": \"boss\", \"language\": \"python\", \"level_theme\": \"integration\", \"structure_focus\": \"boss rewrite with a compact mixed tactic that still stays readable\", \"tutorial_mode\": false}": [
+    {
+      "created_at": "2026-05-30T11:18:24.963987+00:00",
+      "interaction_type": "boss",
+      "level_theme": "integration",
+      "difficulty": "easy",
+      "task": {
+        "interaction_type": "boss",
+        "level_theme": "integration",
+        "difficulty": "easy",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Boss Phase Integration",
+        "prompt": "Write a compact tactic that combines a helper function with a phase-based condition to adjust attack damage dynamically during the System Admin fight",
+        "gameplay_effect": "Your tactic will modify enemy attack power based on current phase to balance difficulty",
+        "syntax_rules": [
+          "Use if/elif/else to check phase conditions",
+          "Define a helper function named like get_attack_damage() to calculate values",
+          "Combine variables with conditions to create dynamic gameplay"
+        ],
+        "explanation_title": "Combining Logic and Values",
+        "explanation_body": "In boss fights, you often need to change behavior based on phases or states. This requires combining conditions (like checking what phase the boss is in) with calculations (using helper functions to compute values). The key is making sure your logic flows cleanly and your variables update properly. Simple constructs like if statements and functions work together to build a readable and effective tactic.",
+        "explanation_rules": [
+          "Conditions must check a gameplay state like phase or health",
+          "Helper functions should return numeric values used in combat"
+        ],
+        "explanation_prompt": "Look for how a condition checks the boss's current state and how a helper function calculates values used in combat",
+        "keywords": [
+          "attack damage",
+          "phase condition",
+          "helper function"
+        ],
+        "example_code": "# Calculate damage based on current phase\ndef get_attack_damage(phase):\n    # Damage increases each phase\n    return 10 + (phase * 5)\n\n# Adjust tactics based on phase\nif boss_phase == 1:\n    # Phase 1: low damage\n    damage = get_attack_damage(1)\nelif boss_phase == 2:\n    # Phase 2: medium damage\n    damage = get_attack_damage(2)\nelse:\n    # Phase 3: high damage\n    damage = get_attack_damage(3)",
+        "adaptation_reason": "The player still needs a stable foundation in this theme, so keep the task short and clear.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around attack damage, phase tracking.",
+          "Keep the snippet focused on the exact prompt: Write a compact tactic that combines a helper function with a phase-based condition to adjust attack damage dynamically "
+        ],
+        "validation_targets": [
+          "attack damage",
+          "phase tracking"
+        ],
+        "pattern_id": ""
+      }
+    }
+  ],
+  "{\"boss_mechanic\": \"\", \"difficulty\": \"normal\", \"encounter_name\": \"Archive Chest\", \"encounter_style\": \"reward_puzzle\", \"interaction_type\": \"chest\", \"language\": \"python\", \"level_theme\": \"variables\", \"structure_focus\": \"two short assignments for a reward-related stat setup\", \"tutorial_mode\": false}": [
+    {
+      "created_at": "2026-05-30T17:03:50.738480+00:00",
+      "interaction_type": "chest",
+      "level_theme": "variables",
+      "difficulty": "normal",
+      "task": {
+        "interaction_type": "chest",
+        "level_theme": "variables",
+        "difficulty": "normal",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Glint-Theta Archive Chest",
+        "prompt": "Set up the combat mode for your next battle using a string variable named mode_type. Choose between 'aggressive', 'defensive', or 'balanced'. Also set a damage multiplier based on your choice, using a variable called damage_boost. Use names like attack_mode or combat_style for the first variable.",
+        "gameplay_effect": "Your next fight will have a different damage output and defense balance depending on the mode you select.",
+        "syntax_rules": [
+          "Assign a string value to mode_type using quotes",
+          "Use a numeric variable damage_boost to scale attack power"
+        ],
+        "explanation_title": "Combat Mode Strings",
+        "explanation_body": "In combat systems, strings are often used to represent states or modes like 'aggressive' or 'defensive'. These can control how other stats behave. When you change a string variable, it affects what numbers or behaviors are used later in the game. This allows for flexible gameplay setups where one choice impacts multiple stats.",
+        "explanation_rules": [
+          "String variables store text labels like 'aggressive'",
+          "Numeric variables store numbers that can be multiplied or added"
+        ],
+        "explanation_prompt": "Look for the keywords 'mode_type' and 'damage_boost' in the task and identify which values correspond to each combat style",
+        "keywords": [
+          "mode_type",
+          "damage_boost"
+        ],
+        "example_code": "# Set the combat approach\nmode_type = \"aggressive\"  # <-- combat mode\n# Adjust damage based on mode\ndamage_boost = 1.5        # <-- damage multiplier\n# Shield strength depends on mode\nshield_boost = 0.8        # <-- defensive multiplier (not required)",
+        "adaptation_reason": "The player solved several recent tasks in this theme, so the task can be more demanding.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around combat mode, attack multiplier.",
+          "Keep the snippet focused on the exact prompt: Set up the combat mode for your next battle using a string variable named mode_type. Choose between 'aggressive', 'defen"
+        ],
+        "validation_targets": [
+          "combat mode",
+          "attack multiplier"
+        ],
+        "pattern_id": ""
+      }
+    },
+    {
+      "created_at": "2026-05-31T16:40:13.414829+00:00",
+      "interaction_type": "chest",
+      "level_theme": "variables",
+      "difficulty": "normal",
+      "task": {
+        "interaction_type": "chest",
+        "level_theme": "variables",
+        "difficulty": "normal",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Tune the Archive Chest's Rewards",
+        "prompt": "Set the chest's health points to 100 and its shield durability to 50 using clear variable names like chest_hp or shield_strength",
+        "gameplay_effect": "Adjusting these values changes how much damage the chest can take before opening and how long it resists attacks",
+        "syntax_rules": [
+          "Assign integers to variables using = operator",
+          "Use descriptive names that clearly indicate what the variable represents"
+        ],
+        "explanation_title": "Meaningful Variable Names",
+        "explanation_body": "In games, variables store important numbers like health, damage, or speed. Using clear names helps you remember what each number means. For example, chest_hp makes it obvious that the variable stores the chest's health points. This clarity is especially helpful when working with multiple stats at once.",
+        "explanation_rules": [
+          "Choose variable names that describe the gameplay value they hold",
+          "Avoid generic names like x or y; prefer descriptive ones like player_health or enemy_damage"
+        ],
+        "explanation_prompt": "Look for gameplay stats mentioned in the task and identify which variables control them",
+        "keywords": [
+          "health points",
+          "shield durability"
+        ],
+        "example_code": "# Set up the chest's defenses\nchest_hp = 100  # health points\nshield_strength = 50  # shield durability\n# These variables determine how much damage the chest can take before opening",
+        "adaptation_reason": "The player solved several recent tasks in this theme, so the task can be more demanding.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around chest health, shield strength.",
+          "Keep the snippet focused on the exact prompt: Set the chest's health points to 100 and its shield durability to 50 using clear variable names like chest_hp or shield_"
+        ],
+        "validation_targets": [
+          "chest health",
+          "shield strength"
+        ],
+        "pattern_id": ""
+      }
+    }
+  ],
+  "{\"boss_mechanic\": \"Tune tactic variables before and during the fight.\", \"difficulty\": \"normal\", \"encounter_name\": \"Threshold Warden\", \"encounter_style\": \"threshold_warden\", \"interaction_type\": \"boss\", \"language\": \"python\", \"level_theme\": \"variables\", \"structure_focus\": \"boss opening plan with stat assignments that tune timing, damage, or guard values\", \"tutorial_mode\": false}": [
+    {
+      "created_at": "2026-05-30T17:04:30.819103+00:00",
+      "interaction_type": "boss",
+      "level_theme": "variables",
+      "difficulty": "normal",
+      "task": {
+        "interaction_type": "boss",
+        "level_theme": "variables",
+        "difficulty": "normal",
+        "language": "python",
+        "generation_source": "ai",
+        "generation_detail": "Live AI generation (Qwen/Qwen2.5-Coder-32B-Instruct, attempt 1)",
+        "title": "Tune Warden's Shield Settings",
+        "prompt": "Adjust the Threshold Warden's shield durability and guard window before the fight begins. Use names like shield_hp or guard_time. Set initial values for these stats.",
+        "gameplay_effect": "Your prepared shield settings will determine how long the Warden's barrier lasts and how long you can defend against its attacks.",
+        "syntax_rules": [
+          "Assign integer values to variables using =",
+          "Use descriptive names like shield_hp or guard_time for clarity"
+        ],
+        "explanation_title": "Variables Store Gameplay Values",
+        "explanation_body": "In games, variables store important values like health points, shield strength, or timing windows. Each variable holds one specific gameplay value that affects how the game behaves. When you assign a value to a variable, you're telling the game what starting amount that stat should have. This is especially useful at the beginning of a fight, where you set up your character or enemy's core stats.",
+        "explanation_rules": [
+          "Variables hold single gameplay values",
+          "Initial assignments happen once at the start"
+        ],
+        "explanation_prompt": "Look for stat names and initial value assignments in the task description",
+        "keywords": [
+          "shield durability",
+          "guard window",
+          "stat assignment"
+        ],
+        "example_code": "# Set up the Warden's shield strength\nshield_hp = 100    # shield durability\nguard_time = 2     # seconds you can block\nattack_power = 25  # damage output",
+        "adaptation_reason": "The player solved several recent tasks in this theme, so the task can be more demanding.",
+        "fallback_hints": [
+          "Map the task wording to code concepts around shield durability, guard window.",
+          "Keep the snippet focused on the exact prompt: Adjust the Threshold Warden's shield durability and guard window before the fight begins. Use names like shield_hp or gu"
+        ],
+        "validation_targets": [
+          "shield durability",
+          "guard window"
         ],
         "pattern_id": ""
       }
